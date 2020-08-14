@@ -1,8 +1,9 @@
 import React, {useRef, useState, useEffect} from 'react';
 import io from "socket.io-client";
 import Video from "./Video";
-import "../styles/styles.css"
-import Peer from "simple-peer"
+import "../styles/styles.css";
+import Peer from "simple-peer";
+import Controls from "./Cotrols";
 
 
 
@@ -12,22 +13,25 @@ const Room = (props) => {
     const videoRef = useRef();
     const peersRef = useRef([]);
     const socketRef = useRef();
-    const controlsRef = useRef();
+    const controlsRef= useRef();
     const [stream, setStream] = useState();
     const otherVideo = useRef();
     const pauseVidBtn = useRef();
     const resumeVidBtn = useRef();
     // const [videoPP, setVideoPP] = useState("play");
     const pauseTrack =(track)=>{
-        console.log();
         switch(track){
             case "video":
                 //pause your video;
                  videoRef.current.pause();
                  socketRef.current.emit("pause video", "");
-                 pauseVidBtn.current.style.display = "none";
-                 resumeVidBtn.current.style.display = "block";
                 break;
+            case "audio":
+                console.log("this fired")
+                //send message to the other peer to mute their audio of you
+                socketRef.current.emit("mute audio", "");
+                break;
+           default: return  
         }
         //this code causes a error, just gonna stop the video and audio manually on the other peer.
         // console.log(stream.getAudioTracks()[0]);
@@ -40,9 +44,11 @@ const Room = (props) => {
                 //resume your video
                 videoRef.current.play();
                 socketRef.current.emit("resume video", "");
-                resumeVidBtn.current.style.display = "none";
-                pauseVidBtn.current.style.display = "block";
-                break;   
+                break; 
+            case "audio":
+                socketRef.current.emit("unmute audio", "")
+                break;
+            default: return    
                  
         }
 
@@ -128,9 +134,16 @@ const Room = (props) => {
                 //pause other video
                 otherVideo.current.pausePlayVid("resume");
             })
+
+            socketRef.current.on("mute audio", data=>{
+                otherVideo.current.pausePlayAud("pause")
+            })
+
+            socketRef.current.on("unmute audio", data=>{
+                otherVideo.current.pausePlayAud("resume")
+            })
             //show the video controls
             controlsRef.current.style.display = "block";
-            resumeVidBtn.current.style.display = "none";
         })
     },[]);
 
@@ -161,13 +174,14 @@ const Room = (props) => {
 
     return ( 
         <div>
-            <div className="controls" ref={controlsRefvid} style={{display: "none"}}>
-                <button ref={pauseVidBtn} className="controls" onClick={()=>{
-                    pauseTrack("video")
-                }}>pause video</button>
-                <button ref={resumeVidBtn} className="controls" onClick={()=>{
-                    resumeTrack("video")
-                }}>resume video</button>
+            <div className="controls"  style={{display: "none"}}>
+
+            </div>
+            <div ref={controlsRef} style={{display: "none"}}>
+
+                {/* <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="video"/> */}
+                <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="audio"/>
+                
             </div>
 
             <div id="container">

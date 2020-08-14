@@ -18,6 +18,23 @@ class Video extends Component {
                 break;
             case "resume":
                 video.play();
+            default: return    
+        }
+    }
+    pausePlayAud(action){
+        const video = document.getElementById("video");
+        switch(action){
+            case "pause":
+                video.muted = true;
+                console.log(video.muted);
+
+                break;
+            case "resume":
+                // video.muted = false;   
+                console.log("unnnnmmmuutteed")
+                // console.log("unnnnnnmuttttted");
+            default: return;
+
         }
     }
     render() { 
