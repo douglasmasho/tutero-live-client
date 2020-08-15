@@ -5,9 +5,10 @@
     border-radius: 300px;
     position: relative;
     transition: all .3s;
-    transition-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    transition-timing-function: ease-out;
     cursor: pointer;
     margin: 2rem;
+    position: relative;
 
     &--icon{
         width: 3rem;
@@ -32,6 +33,7 @@
             transform: translateY(-50%);
             right: 0;
             margin-right: 1rem;
+            animation: popup 0.5s linear;
          }
     }
     &--label{

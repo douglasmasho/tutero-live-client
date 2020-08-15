@@ -14,9 +14,6 @@ const Room = (props) => {
     const controlsRef= useRef();
     const [stream, setStream] = useState();
     const otherVideo = useRef();
-    const pauseVidBtn = useRef();
-    const resumeVidBtn = useRef();
-    // const [videoPP, setVideoPP] = useState("play");
     const pauseTrack =(track)=>{
         switch(track){
             case "video":
@@ -140,8 +137,7 @@ const Room = (props) => {
             socketRef.current.on("unmute audio", data=>{
                 otherVideo.current.pausePlayAud("resume")
             })
-            //show the video controls
-            controlsRef.current.style.display = "block";
+
         })
     },[]);
 
@@ -172,24 +168,26 @@ const Room = (props) => {
 
     return ( 
         <div>
-            <div className="controls"  style={{display: "none"}}>
+             <div className="video-container">
+                    <div  className="video-composition">
+                        <div className="video-pauseContainer">
+                        <p className="video-videoPaused normal-text">Peer paused their video</p>
+                        <p className="video-audioPaused normal-text">Peer muted their audio</p>
+                        </div>
 
-            </div>
-            <div ref={controlsRef} style={{display: "none"}}>
+                        <video muted autoPlay playsInline ref={videoRef} className="video-composition--2"></video>
+                        {
+                            peers.map((peer, index)=>{
+                                return <Video key={index} peer={peer} ref={otherVideo}/>
+                            })
+                        }
+                    </div>
+                    <div className="video-controls" ref={controlsRef} style={{display: "none"}}>
+                        <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="audio"/>
+                    </div>
 
-                {/* <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="video"/> */}
-                <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="audio"/>
-                
-            </div>
+             </div>
 
-            <div id="container">
-                <video muted autoPlay playsInline ref={videoRef} className="video"></video>
-                {
-                    peers.map((peer, index)=>{
-                        return <Video key={index} peer={peer} ref={otherVideo}/>
-                    })
-                }
-           </div>
             
         </div>
 
