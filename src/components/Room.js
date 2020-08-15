@@ -1,10 +1,8 @@
 import React, {useRef, useState, useEffect} from 'react';
 import io from "socket.io-client";
 import Video from "./Video";
-import "../styles/styles.css";
 import Peer from "simple-peer";
-import Controls from "./Cotrols";
-
+import Controls from "./Controls";
 
 
 const Room = (props) => {

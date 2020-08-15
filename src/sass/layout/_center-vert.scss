@@ -1,0 +1,9 @@
+.center-vert{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    &--row{
+        flex-direction: row;
+        align-items: center;
+    }
+}
