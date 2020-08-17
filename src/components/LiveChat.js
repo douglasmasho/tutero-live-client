@@ -27,8 +27,16 @@ const LiveChat = (props) => {
             animationData: animSend,
             loop: false,
         });
-
         animRefSend.current.goToAndStop(0, true);
+
+        
+        const textarea = document.querySelector(".chat--input"); 
+           textarea.addEventListener('input', autoResize, false); 
+
+         function autoResize() { 
+         this.style.height = 'auto'; 
+         this.style.height = this.scrollHeight + 'px'; 
+      } 
     }, [])
 
     const expandChat =()=>{
@@ -62,7 +70,7 @@ const LiveChat = (props) => {
         //conditionally render only if there is a peer
         
 
-            <div style={{width: "21%", height: "100vh", position: "relative"}} className="left-side">
+            <div style={{width: "21%", height: "110vh", position: "relative"}} className="left-side">
                 <div className="chat--container" ref={chatContainer}>
                     <h3 className="chat--header u-margin-bottom">LiveChat</h3>
                     <div ref={animContainerExpand} className="chat--expandIcon" onClick={()=>{
@@ -93,9 +101,8 @@ const LiveChat = (props) => {
                     <div className="chat--typing">{"username"} is typing....</div>
 
                     <div className="chat--bottom">
-                        <input type="text" className="chat--input" placeholder="type your message"/>
-                        <div ref={animContainerSend} class="chat--send" 
-                        onClick={sendMessage}></div>
+                        <textarea className="chat--input" placeholder="type your message"></textarea>
+                        <div ref={animContainerSend} class="chat--send" onClick={sendMessage}></div>
                     </div>
 
                 

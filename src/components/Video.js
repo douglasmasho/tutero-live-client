@@ -45,9 +45,7 @@ class Video extends Component {
                 console.log("unnnnmmmuutteed")
                 // console.log("unnnnnnmuttttted");
                 this.showHideNotice("audio", "hide");
-
-
-                
+                video.muted = false  
 
             default: return;
 

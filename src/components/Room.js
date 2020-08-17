@@ -169,6 +169,9 @@ const Room = (props) => {
     return ( 
         <div>
              <div className="video-container">
+                    <div className="video-controls" ref={controlsRef} style={{display: "none"}}>
+                        <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="audio"/>
+                    </div>
                     <div  className="video-composition">
                         <div className="video-pauseContainer">
                         <p className="video-videoPaused normal-text">Peer paused their video</p>
@@ -182,9 +185,7 @@ const Room = (props) => {
                             })
                         }
                     </div>
-                    <div className="video-controls" ref={controlsRef} style={{display: "none"}}>
-                        <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="audio"/>
-                    </div>
+
 
              </div>
 
