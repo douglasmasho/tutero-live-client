@@ -1,9 +1,12 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useContext} from 'react';
 import io from "socket.io-client";
 import Video from "./Video";
 import Peer from "simple-peer";
 import Controls from "./Controls";
-
+import lottie from "lottie-web";
+import animLoading from "../animations/loading.json"
+import LiveChat from './LiveChat';
+import {socketContext} from "../Context/socketContext"
 
 const Room = (props) => {
     const roomID = props.routeArgs.match.params.roomID;
@@ -12,8 +15,14 @@ const Room = (props) => {
     const peersRef = useRef([]);
     const socketRef = useRef();
     const controlsRef= useRef();
-    const [stream, setStream] = useState();
+    const [isLoading, setIsloading] = useState(true);
     const otherVideo = useRef();
+    const animContainerLoading = useRef();
+    const animRefLoading = useRef(); 
+    const [socket, setSocket] = useState();
+    socketRef.current = useContext(socketContext);
+    const leftSideRef = useRef();
+
     const pauseTrack =(track)=>{
         switch(track){
             case "video":
@@ -51,11 +60,15 @@ const Room = (props) => {
     }
 
     useEffect(()=>{
+        animRefLoading.current = lottie.loadAnimation({
+            container: animContainerLoading.current,
+            animationData: animLoading,
+            loop: true,
+        });
         //init socket
-        socketRef.current = io.connect("/");
+        // setSocket(socketRef.current);
         //get media stream 
         navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream=>{
-            setStream(stream);
             //put the stream in the ref
             //everything else is done here
             videoRef.current.srcObject = stream;
@@ -67,6 +80,7 @@ const Room = (props) => {
             });
 
             socketRef.current.on("you joined", otherUsers=>{
+                leftSideRef.current.style.display = "block";
                 //create a peer for each user
                 const peers = [];
                 otherUsers.forEach(userID=>{
@@ -92,8 +106,8 @@ const Room = (props) => {
                     peerID: callerID,
                     peer
                 })   
-                //ad peer to peer state 
-                setPeers(peers=> [...peers, peer])
+                //add peer to peer state 
+                setPeers(peers=> [...peers, peer]);
             })
 
             socketRef.current.on("recipient returned signal", data=>{
@@ -103,7 +117,6 @@ const Room = (props) => {
             ))
                 const peer = peerObj.peer;
                 peer.signal(data.signal);
-
                 //add pausing controls
             })
 
@@ -114,6 +127,7 @@ const Room = (props) => {
                 // //remove the peer from the array in state.
                 setPeers(peers=> (peers.filter(p=>(p !== discPeer)) ) )
                 discPeer.destroy();
+                //put a disconnected
             })
 
             socketRef.current.on("hello world", data=>{
@@ -157,8 +171,7 @@ const Room = (props) => {
         //create a non-initiator peer
         const peer = new Peer({initiator:false, trickle:false, stream: stream});
         //set the RespPeer signal to the incoming signal
-        peer.signal(signal)
-
+        peer.signal(signal);
         //respond to caller when signal is ready
         peer.on("signal", signal=>{
             socketRef.current.emit("returning signal", {signal: signal, callerID: callerID});
@@ -167,9 +180,16 @@ const Room = (props) => {
     }
 
     return ( 
-        <div>
+        <div className="row" style={{justifyContent: "space-between"}}>
+             <div style={{width: "21%", height: "100vh", position: "relative", display: "none"}} ref={leftSideRef} className="left-side">
+                <LiveChat/>
+             </div>
+
              <div className="video-container">
-                    <div className="video-controls" ref={controlsRef} style={{display: "none"}}>
+                 <div className="loading loading--1" ref={animContainerLoading}>
+                 </div>
+
+                    <div className="video-controls center-vert" ref={controlsRef} style={{display: "none"}}>
                         <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="audio"/>
                     </div>
                     <div  className="video-composition">
@@ -177,7 +197,7 @@ const Room = (props) => {
                         <p className="video-videoPaused normal-text">Peer paused their video</p>
                         <p className="video-audioPaused normal-text">Peer muted their audio</p>
                         </div>
-
+                        
                         <video muted autoPlay playsInline ref={videoRef} className="video-composition--2"></video>
                         {
                             peers.map((peer, index)=>{
@@ -185,11 +205,7 @@ const Room = (props) => {
                             })
                         }
                     </div>
-
-
-             </div>
-
-            
+             </div>  
         </div>
 
      );

@@ -4,8 +4,8 @@
         display:flex;
         justify-content: center;
         width: 65%;
-        // height: 60rem;
-        overflow: visible;
+        height: 100vh;
+        // overflow: visible;
     }
 
     &-composition{
@@ -16,7 +16,9 @@
         margin-bottom: 2rem;
         &--1{
             width: 100%;
-            //  position: absolute;
+            // height: 100%;
+             position: absolute;
+             bottom: 0;
             border-radius: 30px;
             transition: all .3s;
         }

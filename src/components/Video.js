@@ -8,7 +8,8 @@ class Video extends Component {
     componentDidMount(){
         this.peer.on("stream", stream=>{
             document.getElementById("video").srcObject = stream;
-            document.querySelector(".video-controls").style.display = "block";
+            document.querySelector(".video-controls").style.display = "flex";
+            document.querySelector(".loading--1").style.display = "none";
         })
     }
     pausePlayVid(action){
