@@ -45,8 +45,7 @@ const Controls = (props) => {
 
     
     const blurUnblurVid =(action)=>{
-        // console.log("this must fire")
-        const video = document.querySelector(".video-composition--2");
+        const video = props.video;
         let className, lastClassName;
         switch(action){
             case "blur":
@@ -57,7 +56,6 @@ const Controls = (props) => {
                 className = "video__unblurred" 
                 lastClassName = "video__blurred";
         }
-
         if(video.classList.contains(lastClassName)){
             video.classList.remove(lastClassName);
             video.classList.add(className);
@@ -113,7 +111,6 @@ const Controls = (props) => {
                                             setAudState("on");
                                             props.resumeTrack("audio");
                                             //hide notice(audio)
-    
                                         }   
                             }}></div>
                             <span className="row-4--child normal-text controls--label">on</span>
@@ -123,8 +120,6 @@ const Controls = (props) => {
                     </div>      
                 </div>
          )
-
-
 }
  
 export default Controls;

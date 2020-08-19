@@ -33,12 +33,9 @@ const LiveChat = (props) => {
             animationData: animSend,
             loop: false,
         });
-        animRefSend.current.goToAndStop(0, true);
-
-        
-        const textarea = document.querySelector(".chat--input"); 
-           textarea.addEventListener('input', autoResize, false); 
-
+         animRefSend.current.goToAndStop(0, true);
+         
+         textAreaRef.current.addEventListener('input', autoResize, false); 
          function autoResize() { 
          this.style.height = 'auto'; 
          this.style.height = this.scrollHeight + 'px'; 
@@ -140,25 +137,8 @@ const LiveChat = (props) => {
                         }
                     }}>
                     </div>
-
-                    
-                        
                             <Messages msgArr={msgArray} ref={msgCompRef} deleteMsg={deleteMsg}/>
-                            {/* <div className="message message__peer u-margin-bottom">
-                                <p className="message--userName normal-text u-margin-bottom-small bold-text">{"userName"}</p>
-                                <p className="normal-text message--text">Lorem ipsum dolor sit amet consectetur adiendis.</p> 
-                            </div> */}
-
-                         
-                            {/* <div style={{display: "flex", justifyContent: "flex-end"}}>
-                                <div className="message message__mine u-margin-bottom">
-                                    <p className="message--userName normal-text u-margin-bottom-small bold-text">{"userName"}</p>
-                                    <p className="normal-text message--text">Lorem im, quas. harum possimus sequi aut sapiente magnam doloremque commodi reiciendis.</p> 
-                                </div>
-                            </div>                             */}
-                
-
-                    <div className="chat--typing" ref={typingRef}></div>
+                            <div className="chat--typing" ref={typingRef}></div>
 
 
                         <div className="chat--bottom">

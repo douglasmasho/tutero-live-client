@@ -1,19 +1,20 @@
-import React, {useRef, useEffect, useState, Component} from 'react';
+import React, {Component} from 'react';
 
 
 class Video extends Component {
 
     peer = this.props.peer;
+    video = React.createRef();
 
     componentDidMount(){
         this.peer.on("stream", stream=>{
-            document.getElementById("video").srcObject = stream;
-            document.querySelector(".video-controls").style.display = "flex";
-            document.querySelector(".loading--1").style.display = "none";
+            this.video.current.srcObject = stream;
+            this.props.videoControls.style.display = "flex";
+            this.props.loadingRef.style.display = "none";
         })
     }
     pausePlayVid(action){
-        const video = document.getElementById("video");
+        const video = this.video.current;
         switch(action){
             case "pause":
                 video.pause();
@@ -33,7 +34,7 @@ class Video extends Component {
         }
     }
     pausePlayAud(action){
-        const video = document.getElementById("video");
+        const video = this.video.current;
         switch(action){
             case "pause":
                 video.muted = true;
@@ -54,7 +55,7 @@ class Video extends Component {
     }
 
     blurUnblurVid(action){
-        const video = document.getElementById("video");
+        const video = this.video.current;
         let className, lastClassName;
         switch(action){
             case "blur":
@@ -75,8 +76,8 @@ class Video extends Component {
     }
 
     showHideNotice(track, action){
-        const videoNotice = document.querySelector(".video-videoPaused ");
-        const audioNotice = document.querySelector(".video-audioPaused");
+        const videoNotice = this.props.videoPausedRef;
+        const audioNotice = this.props.audioPausedRef;
         let className;
         let lastClassName;
         switch(action){
@@ -119,30 +120,9 @@ class Video extends Component {
 
     render() { 
         return ( 
-            <video className="video-composition--1" id="video" playsInline autoPlay></video>
+            <video className="video-composition--1" ref={this.video} playsInline autoPlay></video>
          );
     }
 }
  
 export default Video;
-
-
-
-
-// const Video = (props) => {
-//     const ref = useRef();
-//     const peer = props.peer;
-//     const [videoPaused, setVideoPaused] = useState()
-
-//     useEffect(()=>{
-//         peer.on("stream", stream=>{
-//             ref.current.srcObject = stream
-//         })
-//     }, [])
-
-//     return ( 
-//         <video  className="video" playsInline autoPlay ref={ref}></video>
-//      );
-// }
- 
-// export default Video;

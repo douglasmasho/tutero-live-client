@@ -9,19 +9,21 @@ import LiveChat from './LiveChat';
 import {socketContext} from "../Context/socketContext"
 
 const Room = (props) => {
-    const roomID = props.routeArgs.match.params.roomID;
-    const [peers, setPeers] = useState([]);
-    const videoRef = useRef();
-    const peersRef = useRef([]);
-    const socketRef = useRef();
-    const controlsRef= useRef();
-    const [isLoading, setIsloading] = useState(true);
-    const otherVideo = useRef();
-    const animContainerLoading = useRef();
-    const animRefLoading = useRef(); 
-    const [socket, setSocket] = useState();
+    const roomID = props.routeArgs.match.params.roomID,
+          [peers, setPeers] = useState([]),
+          videoRef = useRef(),
+          peersRef = useRef([]),
+          socketRef = useRef(),
+          controlsRef= useRef(),
+          otherVideo = useRef(),
+          animContainerLoading = useRef(),
+          animRefLoading = useRef(),
+          [socket, setSocket] = useState(),
+          leftSideRef = useRef(),
+          videoPausedRef = useRef(),
+          audioPausedRef = useRef();
+
     socketRef.current = useContext(socketContext);
-    const leftSideRef = useRef();
 
     const pauseTrack =(track)=>{
         switch(track){
@@ -66,7 +68,6 @@ const Room = (props) => {
             loop: true,
         });
         //init socket
-        // setSocket(socketRef.current);
         //get media stream 
         navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream=>{
             //put the stream in the ref
@@ -184,24 +185,24 @@ const Room = (props) => {
              <div style={{width: "21%", height: "100vh", position: "relative", display: "none"}} ref={leftSideRef} className="left-side">
                 <LiveChat/>
              </div>
-
              <div className="video-container">
-                 <div className="loading loading--1" ref={animContainerLoading}>
+                 <div className="loading" ref={animContainerLoading}>
                  </div>
 
                     <div className="video-controls center-vert" ref={controlsRef} style={{display: "none"}}>
-                        <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} controlsType="audio"/>
+                        <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current}/>
                     </div>
+                    
                     <div  className="video-composition">
                         <div className="video-pauseContainer">
-                        <p className="video-videoPaused normal-text">Peer paused their video</p>
-                        <p className="video-audioPaused normal-text">Peer muted their audio</p>
+                        <p className="video-videoPaused normal-text" ref={videoPausedRef}>Peer paused their video</p>
+                        <p className="video-audioPaused normal-text" ref={audioPausedRef}>Peer muted their audio</p>
                         </div>
                         
                         <video muted autoPlay playsInline ref={videoRef} className="video-composition--2"></video>
                         {
                             peers.map((peer, index)=>{
-                                return <Video key={index} peer={peer} ref={otherVideo}/>
+                                return <Video key={index} peer={peer} ref={otherVideo} videoControls={controlsRef.current} loadingRef={animContainerLoading.current} videoPausedRef={videoPausedRef.current} audioPausedRef={audioPausedRef.current}/>
                             })
                         }
                     </div>
