@@ -68,7 +68,7 @@ const Controls = (props) => {
 
     return(
                 <div>
-                    <div className="controls controls__1" style={{backgroundColor: getColorVid()}}>
+                    <div className="controls controls__1" style={{backgroundColor: getColorVid(), ...props.styleObj}}>
                             <span className="controls--icon"><img src={Camcorder} alt="" className="controls__icon" style={{width: "30px"}}/></span>
                             <div className="row controls--expanded center-vert--row">
                             <span className="row-4--child normal-text controls--label">off</span>
@@ -95,7 +95,7 @@ const Controls = (props) => {
                     </div>
 
 
-                    <div className="controls controls__2" style={{backgroundColor: getColorAud()}}>
+                    <div className="controls controls__2" style={{backgroundColor: getColorAud(),...props.styleObj}}>
                         <span className="controls--icon"><img src={Mic} alt="" className="controls__icon" style={{width: "30px"}} /></span>
                         <div className="row controls--expanded  center-vert--row">
                             <span className="row-4--child normal-text controls--label">off</span>

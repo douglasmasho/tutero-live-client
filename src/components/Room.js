@@ -6,11 +6,16 @@ import Controls from "./Controls";
 import lottie from "lottie-web";
 import animLoading from "../animations/loading.json"
 import LiveChat from './LiveChat';
-import {socketContext} from "../Context/socketContext"
+import {socketContext} from "../Context/socketContext";
+import Icon from "./Icon";
+import Middle from './Middle';
+
 
 const Room = (props) => {
     const roomID = props.routeArgs.match.params.roomID,
           [peers, setPeers] = useState([]),
+          [mode, setMode] = useState("default"),
+          [currentFeature, setCurrentFeature] = useState(""),
           videoRef = useRef(),
           peersRef = useRef([]),
           socketRef = useRef(),
@@ -18,10 +23,15 @@ const Room = (props) => {
           otherVideo = useRef(),
           animContainerLoading = useRef(),
           animRefLoading = useRef(),
-          [socket, setSocket] = useState(),
-          leftSideRef = useRef(),
           videoPausedRef = useRef(),
-          audioPausedRef = useRef();
+          audioPausedRef = useRef(),
+          [hasJoined, setHasJoined] = useState(false),
+          screenShareRef = useRef(),
+          ytShareRef = useRef(),
+          liveCanvasRef = useRef(),
+          fileShareRef = useRef(),
+          liveChatRef = useRef(),
+          videoContainerRef = useRef();
 
     socketRef.current = useContext(socketContext);
 
@@ -37,7 +47,7 @@ const Room = (props) => {
                 //send message to the other peer to mute their audio of you
                 socketRef.current.emit("mute audio", "");
                 break;
-           default: return  
+           default: return
         }
         //this code causes a error, just gonna stop the video and audio manually on the other peer.
         // console.log(stream.getAudioTracks()[0]);
@@ -81,7 +91,8 @@ const Room = (props) => {
             });
 
             socketRef.current.on("you joined", otherUsers=>{
-                leftSideRef.current.style.display = "block";
+                //user has joined a room
+                 setHasJoined(true);
                 //create a peer for each user
                 const peers = [];
                 otherUsers.forEach(userID=>{
@@ -180,34 +191,112 @@ const Room = (props) => {
         return peer;
     }
 
-    return ( 
-        <div className="row" style={{justifyContent: "space-between"}}>
-             <div style={{width: "21%", height: "100vh", position: "relative", display: "none"}} ref={leftSideRef} className="left-side">
-                <LiveChat/>
-             </div>
-             <div className="video-container">
-                 <div className="loading" ref={animContainerLoading}>
-                 </div>
+    const initFeatureMode =(feature)=>{
+        setMode("feature");
+        setCurrentFeature(feature);
+    }
 
+    const initDefaultMode = ()=>{
+        setMode("default");
+        document.querySelector(".active").classList.remove("active")
+    }
+
+    let containerStyle, video1Style, video2Style, pausedStyle, controlsStyle;
+    switch(mode){
+        case "feature":
+            containerStyle = {
+                width: "20%",
+                display: "flex",
+                flexDirection: "column"
+            };
+            video1Style = {
+                width: "100%",
+                height: "unset",
+                position: "relative",
+                borderRadius: 0,
+                borderBottomLeftRadius: "20px",
+                borderBottomRightRadius: "20px"
+            };
+            video2Style = {
+                position: "relative",
+                bottom: "unset",
+                left: "unset",
+                width: "100%",
+                borderRadius: 0,
+                borderTopLeftRadius: "20px",
+                borderTopRightRadius: "20px"
+            };
+            pausedStyle = {
+                position: "relative",
+                left: "unset",
+                top: "unset",
+            };
+            controlsStyle = {
+                marginRight: 0
+            }
+        break;
+        case "default":
+            containerStyle = {};
+            video1Style = {};
+            video2Style = {};
+            pausedStyle = {};
+            controlsStyle = {};
+            break;
+    }
+
+     //prevent user from using controls if they havent joined
+    let icons;
+     if(hasJoined){
+        icons = <>
+                    <Icon feature={"screenShare"} ref={screenShareRef} featureMode={initFeatureMode}/>
+                    <Icon feature={"ytShare"} ref={ytShareRef} featureMode={initFeatureMode}/>
+                    <Icon feature={"liveCanvas"} ref={liveCanvasRef} featureMode={initFeatureMode}/>
+                    <Icon feature={"fileShare"} ref={fileShareRef} featureMode={initFeatureMode}/>
+                    <Icon feature={"liveChat"} ref={liveChatRef} featureMode={initFeatureMode}/>
+               </>
+    }else{
+        icons = null
+    }
+
+    ///do he same thing for the middle div component
+    let middle
+    if(hasJoined){
+        middle =  <Middle currentFeature={currentFeature} defaultMode={initDefaultMode} mode={mode}/>
+    }else{
+        middle = null
+    }
+
+
+
+    return ( 
+        <div className="row" style={{justifyContent: "space-between", height: "100%", padding: 0}}>
+             <div className="features--tab">
+                 {icons}
+             </div>
+
+             {middle}
+             <div className="video-container" style={containerStyle}>
+                 <div className="loading" ref={animContainerLoading}>
+             </div>
                     <div className="video-controls center-vert" ref={controlsRef} style={{display: "none"}}>
-                        <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current}/>
+                        <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current} styleObj={controlsStyle}/>
                     </div>
                     
                     <div  className="video-composition">
-                        <div className="video-pauseContainer">
+                        <div className="video-pauseContainer"  style={pausedStyle}>
                         <p className="video-videoPaused normal-text" ref={videoPausedRef}>Peer paused their video</p>
                         <p className="video-audioPaused normal-text" ref={audioPausedRef}>Peer muted their audio</p>
                         </div>
                         
-                        <video muted autoPlay playsInline ref={videoRef} className="video-composition--2"></video>
+                        <video muted autoPlay playsInline ref={videoRef} className="video-composition--2" style={video2Style}></video>
                         {
                             peers.map((peer, index)=>{
-                                return <Video key={index} peer={peer} ref={otherVideo} videoControls={controlsRef.current} loadingRef={animContainerLoading.current} videoPausedRef={videoPausedRef.current} audioPausedRef={audioPausedRef.current}/>
+                                return <Video key={index} peer={peer} ref={otherVideo} videoControls={controlsRef.current} loadingRef={animContainerLoading.current} videoPausedRef={videoPausedRef.current} audioPausedRef={audioPausedRef.current} styleObj={video1Style}/>
                             })
                         }
                     </div>
              </div>  
-        </div>
+             </div>
 
      );
 }

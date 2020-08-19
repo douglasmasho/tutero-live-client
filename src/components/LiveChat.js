@@ -6,6 +6,8 @@ import  {socketContext} from "../Context/socketContext";
 import Messages from "./Messages";
 import {v4 as uuidv4} from "uuid";
 
+
+
 const LiveChat = (props) => {
     const animContainerExpand = useRef();
     const animRefExpand = useRef();
@@ -20,7 +22,6 @@ const LiveChat = (props) => {
     const typingRef = useRef();
 
     useEffect(()=>{
-        console.log("mounted")
         animRefExpand.current = lottie.loadAnimation({
             container: animContainerExpand.current,
             animationData: animExpand,
@@ -41,10 +42,19 @@ const LiveChat = (props) => {
          this.style.height = this.scrollHeight + 'px'; 
       } 
 
+        //get the messages array from the server after the Room component has put you into the room
+        socket.emit("room messages", "");
+
+      socket.on("room messages", data=>{
+          console.log(data);
+        setMsgArray(data);
+      })
         socket.on("message", data=>{
             const msgObj = {
                 msg: data.msg,
+                //when auth is there, match the data.id with auth id/userName
                 isMine: socket.id === data.id,
+                //data.id is the auth id/userBame
                 id: data.id,
                 msgId: data.uuId
             }
@@ -52,6 +62,7 @@ const LiveChat = (props) => {
             //scroll that thing down
             msgCompRef.current.scrollToBottom()
         })
+
 
         socket.on("typing", data=>{
             //show the typing div
@@ -124,8 +135,6 @@ const LiveChat = (props) => {
 
     return ( 
         //conditionally render only if there is a peer
-        
-
            
                 <div className="chat--container" ref={chatContainer}>
                     <h3 className="chat--header u-margin-bottom-small">LiveChat</h3>
@@ -144,15 +153,8 @@ const LiveChat = (props) => {
                         <div className="chat--bottom">
                             <textarea ref={textAreaRef} className="chat--input" placeholder="type your message" onKeyUp={typingMessage}></textarea>
                         <   div ref={animContainerSend} className="chat--send" onClick={sendMessage}></div>
-                        </div>
-         
-
-
-                
-                
+                        </div>            
                 </div>
-          
-   
      );
 }
  

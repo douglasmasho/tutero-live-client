@@ -120,7 +120,7 @@ class Video extends Component {
 
     render() { 
         return ( 
-            <video className="video-composition--1" ref={this.video} playsInline autoPlay></video>
+            <video style={this.props.styleObj} className="video-composition--1" ref={this.video} playsInline autoPlay></video>
          );
     }
 }
