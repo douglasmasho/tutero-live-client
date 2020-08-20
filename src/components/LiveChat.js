@@ -9,12 +9,12 @@ import {v4 as uuidv4} from "uuid";
 
 
 const LiveChat = (props) => {
-    const animContainerExpand = useRef();
-    const animRefExpand = useRef();
+    // const animContainerExpand = useRef();
+    // const animRefExpand = useRef();
     const animContainerSend = useRef();
     const animRefSend = useRef();
     const chatContainer = useRef();
-    const [isExpanded, setIsExpanded] = useState(false);
+    // const [isExpanded, setIsExpanded] = useState(false);
     const socket = useContext(socketContext);
     const textAreaRef = useRef();
     const [msgArray, setMsgArray] = useState([]);
@@ -22,13 +22,6 @@ const LiveChat = (props) => {
     const typingRef = useRef();
 
     useEffect(()=>{
-        animRefExpand.current = lottie.loadAnimation({
-            container: animContainerExpand.current,
-            animationData: animExpand,
-            loop: false,
-        });
-        animRefExpand.current.goToAndStop(30, true);
-
         animRefSend.current = lottie.loadAnimation({
             container: animContainerSend.current,
             animationData: animSend,
@@ -45,10 +38,20 @@ const LiveChat = (props) => {
         //get the messages array from the server after the Room component has put you into the room
         socket.emit("room messages", "");
 
-      socket.on("room messages", data=>{
+        socket.on("room messages", data=>{
           console.log(data);
-        setMsgArray(data);
-      })
+          let arr= data.map(obj=>({ 
+                    msg: obj.msg,
+                    //when auth is there, match the obj.id with auth id/userName
+                    isMine: socket.id === obj.id,
+                    //obj.id is the auth id/userBame
+                    id: obj.id,
+                    msgId: obj.uuId
+                    }
+                    ))
+
+        setMsgArray(arr);
+        })
         socket.on("message", data=>{
             const msgObj = {
                 msg: data.msg,
@@ -58,6 +61,7 @@ const LiveChat = (props) => {
                 id: data.id,
                 msgId: data.uuId
             }
+            console.log(msgObj.isMine)
             setMsgArray(state=>[...state, msgObj]);
             //scroll that thing down
             msgCompRef.current.scrollToBottom()
@@ -66,12 +70,13 @@ const LiveChat = (props) => {
 
         socket.on("typing", data=>{
             //show the typing div
-            typingRef.current.style.opacity = "100%";
-            typingRef.current.textContent = `${data} is typing...` 
+                typingRef.current.style.opacity = "100%";
+                typingRef.current.textContent = `${data} is typing...` 
+
         })
 
         socket.on("stopped typing", data=>{
-             typingRef.current.style.opacity = 0;
+            typingRef.current.style.opacity = 0;
         })
 
         socket.on("message deleted", data=>{
@@ -83,23 +88,23 @@ const LiveChat = (props) => {
             ));
         })
 
+ 
+        return ()=>{
+            //remove the listeners
+            socket.off("room messages")
+            socket.off("message")
+            socket.off("typing")
+            socket.off("stopped typing")
+            socket.off("message deleted")
+        }
     
     }, []);
 
-    const expandChat =()=>{
-        animRefExpand.current.playSegments([60,90], true);
-        setIsExpanded(true);
-        chatContainer.current.classList.add("chat--container__expanded");
-        
-        // chatContainer.current.style.position = "absolute";
-    }
+    useEffect(()=>{
+        msgCompRef.current.scrollToBottom()
+    })
 
-    const closeChat = ()=>{
-        animRefExpand.current.playSegments([15,40], true);
-        setIsExpanded(false);
-        chatContainer.current.classList.remove("chat--container__expanded");
 
-    }
 
     const sendMessage = ()=>{
         //play animation
@@ -138,20 +143,15 @@ const LiveChat = (props) => {
            
                 <div className="chat--container" ref={chatContainer}>
                     <h3 className="chat--header u-margin-bottom-small">LiveChat</h3>
-                    <div ref={animContainerExpand} className="chat--expandIcon" onClick={()=>{
-                        if(isExpanded){
-                            closeChat();
-                        }else{
-                            expandChat();
-                        }
+                    {/* <div ref={animContainerExpand} className="chat--expandIcon" onClick={()=>{
                     }}>
-                    </div>
+                    </div> */}
                             <Messages msgArr={msgArray} ref={msgCompRef} deleteMsg={deleteMsg}/>
                             <div className="chat--typing" ref={typingRef}></div>
 
 
                         <div className="chat--bottom">
-                            <textarea ref={textAreaRef} className="chat--input" placeholder="type your message" onKeyUp={typingMessage}></textarea>
+                            <textarea ref={textAreaRef} className="chat--input" placeholder="Type your message" onKeyUp={typingMessage}></textarea>
                         <   div ref={animContainerSend} className="chat--send" onClick={sendMessage}></div>
                         </div>            
                 </div>

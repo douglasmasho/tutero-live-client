@@ -11,7 +11,7 @@ class Messages extends Component {
     msgContainer = React.createRef();
 
     scrollToBottom(){
-        this.msgContainer.current.scrollTo(0, this.msgContainer.current.scrollHeight)
+        this.msgContainer.current.scrollTo(0, this.msgContainer.current.scrollHeight);
     }
 
     componentDidMount(){

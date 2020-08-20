@@ -26,12 +26,8 @@ const Room = (props) => {
           videoPausedRef = useRef(),
           audioPausedRef = useRef(),
           [hasJoined, setHasJoined] = useState(false),
-          screenShareRef = useRef(),
-          ytShareRef = useRef(),
-          liveCanvasRef = useRef(),
-          fileShareRef = useRef(),
-          liveChatRef = useRef(),
-          videoContainerRef = useRef();
+          videoContainerRef = useRef(),
+          hamburgerRef = useRef();
 
     socketRef.current = useContext(socketContext);
 
@@ -248,11 +244,11 @@ const Room = (props) => {
     let icons;
      if(hasJoined){
         icons = <>
-                    <Icon feature={"screenShare"} ref={screenShareRef} featureMode={initFeatureMode}/>
-                    <Icon feature={"ytShare"} ref={ytShareRef} featureMode={initFeatureMode}/>
-                    <Icon feature={"liveCanvas"} ref={liveCanvasRef} featureMode={initFeatureMode}/>
-                    <Icon feature={"fileShare"} ref={fileShareRef} featureMode={initFeatureMode}/>
-                    <Icon feature={"liveChat"} ref={liveChatRef} featureMode={initFeatureMode}/>
+                    <Icon feature={"screenShare"}  featureMode={initFeatureMode}/>
+                    <Icon feature={"ytShare"}  featureMode={initFeatureMode}/>
+                    <Icon feature={"liveCanvas"} featureMode={initFeatureMode}/>
+                    <Icon feature={"fileShare"}  featureMode={initFeatureMode}/>
+                    <Icon feature={"liveChat"} featureMode={initFeatureMode}/>
                </>
     }else{
         icons = null

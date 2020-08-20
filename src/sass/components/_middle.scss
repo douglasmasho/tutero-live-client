@@ -1,0 +1,17 @@
+.middle{
+    background-color: $gray-dark;
+    position: relative;
+    height: 100vh;
+
+    &,&--close{
+        transition: all .3s;
+    }
+
+    &--close{
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 1rem;
+        z-index: 500;
+    }
+}
