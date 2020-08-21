@@ -13,6 +13,7 @@ class Video extends Component {
             this.props.loadingRef.style.display = "none";
         })
     }
+    
     pausePlayVid(action){
         const video = this.video.current;
         switch(action){

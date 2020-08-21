@@ -142,7 +142,7 @@ const LiveChat = (props) => {
         //conditionally render only if there is a peer
            
                 <div className="chat--container" ref={chatContainer}>
-                    <h3 className="chat--header u-margin-bottom-small">LiveChat</h3>
+                    {/* <h3 className="chat--header u-margin-bottom-small">LiveChat</h3> */}
                     {/* <div ref={animContainerExpand} className="chat--expandIcon" onClick={()=>{
                     }}>
                     </div> */}

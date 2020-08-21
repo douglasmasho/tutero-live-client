@@ -9,11 +9,14 @@ import LiveChat from './LiveChat';
 import {socketContext} from "../Context/socketContext";
 import Icon from "./Icon";
 import Middle from './Middle';
+import streamSaver from "streamsaver";
+import FileShare from './FileShare';
 
+const worker = new Worker("../worker.js");
 
 const Room = (props) => {
     const roomID = props.routeArgs.match.params.roomID,
-          [peers, setPeers] = useState([]),
+          [peers, setPeers] = useState([]),//////////////////////your peer is here
           [mode, setMode] = useState("default"),
           [currentFeature, setCurrentFeature] = useState(""),
           videoRef = useRef(),
@@ -27,7 +30,9 @@ const Room = (props) => {
           audioPausedRef = useRef(),
           [hasJoined, setHasJoined] = useState(false),
           videoContainerRef = useRef(),
-          hamburgerRef = useRef();
+          hamburgerRef = useRef(),
+          [connectionMade, setConnectionMade] = useState(false);
+          
 
     socketRef.current = useContext(socketContext);
 
@@ -125,7 +130,8 @@ const Room = (props) => {
             ))
                 const peer = peerObj.peer;
                 peer.signal(data.signal);
-                //add pausing controls
+                //set signal as established 
+                setConnectionMade(true);
             })
 
             socketRef.current.on("client disconnected", discID=>{
@@ -164,14 +170,102 @@ const Room = (props) => {
     },[]);
 
 
-              
+      /////////////////////////////////////////////////////
+    //   const connectionMade = props.connectionMade,
+    //   const animContainerLoading = useRef(),
+    //   const animRefLoading = useRef(),
+    //   const downloadPrompt = useRef(),
+    //   const sendFilePrompt = useRef(),
+    //   [file, setFile] = useState(),
+    //   fileNameRef = useRef(""),
+    //   [gotFile, setGotFile] = useState(false);
+
+
+
+    //   function handleReceivingData(data) {
+    //     if (data.toString().includes("done")) {
+    //         setGotFile(true);
+    //         const parsed = JSON.parse(data);
+    //         fileNameRef.current = parsed.fileName;
+    //     } else {
+    //         worker.postMessage(data);
+    //     }
+    // }
+
+    // function download() {
+    //     setGotFile(false);
+    //     worker.postMessage("download");
+    //     worker.addEventListener("message", event => {
+    //         const stream = event.data.stream();
+    //         console.log(event.data)
+    //         const fileStream = streamSaver.createWriteStream(fileNameRef.current);
+    //         stream.pipeTo(fileStream);
+    //     })
+    // }
+
+    // function selectFile(e) {
+    //     setFile(e.target.files[0]);
+    // }
+
+    // function sendFile() {
+    //     const peer = peers[0];
+    //     const stream = file.stream();
+    //     const reader = stream.getReader();
+
+    //     reader.read().then(obj => {
+    //         handlereading(obj.done, obj.value);
+    //     });
+
+    //     function handlereading(done, value) {
+    //         if (done) {
+    //             peer.write(JSON.stringify({ done: true, fileName: file.name }));
+    //             return;
+    //         }
+
+    //         peer.write(value);
+    //         reader.read().then(obj => {
+    //             handlereading(obj.done, obj.value);
+    //         })
+    //     }
+
+    // }
+
+    // let body;
+    // if (connectionMade) {
+    //     body = (
+    //         <div>
+    //             <input onChange={selectFile} type="file" />
+    //             <button onClick={sendFile}>Send file</button>
+    //         </div>
+    //     );
+    // } else {
+    //     body = (
+    //         <h1>Once you have a peer connection, you will be able to share files</h1>
+    //     );
+    // }
+
+    // let downloadPrompt;
+    // if (gotFile) {
+    //     downloadPrompt = (
+    //         <div>
+    //             <span>You have received a file. Would you like to download the file?</span>
+    //             <button onClick={download}>Yes</button>
+    //         </div>
+    //     );
+    // }
+
+
+      /////////////////////////////////////////////////////        
+
     const createPeer = (recipient, stream)=>{
         //create a peer
         const peer = new Peer({initiator: true, trickle: false, stream: stream});
         //when signal is ready, send one
+        /////////////listen to events 
         peer.on("signal", signal=>{
             socketRef.current.emit("sending signal", {recipient: recipient, signal: signal})
         });
+        // peer.on("data", handleReceivingData);
         return peer;
     }
 
@@ -180,10 +274,13 @@ const Room = (props) => {
         const peer = new Peer({initiator:false, trickle:false, stream: stream});
         //set the RespPeer signal to the incoming signal
         peer.signal(signal);
+        setConnectionMade(true);
         //respond to caller when signal is ready
         peer.on("signal", signal=>{
             socketRef.current.emit("returning signal", {signal: signal, callerID: callerID});
         })
+        // peer.on("data", handleReceivingData);
+
         return peer;
     }
 
@@ -262,37 +359,48 @@ const Room = (props) => {
         middle = null
     }
 
+    let fileShare
+    if(peers.length === 1){
+        fileShare = <FileShare peer={peers[0]} connectionMade={connectionMade}/>
+    }
 
 
     return ( 
-        <div className="row" style={{justifyContent: "space-between", height: "100%", padding: 0}}>
-             <div className="features--tab">
-                 {icons}
-             </div>
+        <div>
 
-             {middle}
-             <div className="video-container" style={containerStyle}>
-                 <div className="loading" ref={animContainerLoading}>
-             </div>
-                    <div className="video-controls center-vert" ref={controlsRef} style={{display: "none"}}>
-                        <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current} styleObj={controlsStyle}/>
+                <div className="row" style={{justifyContent: "space-between", height: "100%", padding: 0}}>
+                    <div className="features--tab">
+                        {icons}
                     </div>
-                    
-                    <div  className="video-composition">
-                        <div className="video-pauseContainer"  style={pausedStyle}>
-                        <p className="video-videoPaused normal-text" ref={videoPausedRef}>Peer paused their video</p>
-                        <p className="video-audioPaused normal-text" ref={audioPausedRef}>Peer muted their audio</p>
+
+                    {middle}
+                    <div className="video-container" style={containerStyle}>
+                        <div className="loading" ref={animContainerLoading}>
                         </div>
-                        
-                        <video muted autoPlay playsInline ref={videoRef} className="video-composition--2" style={video2Style}></video>
-                        {
-                            peers.map((peer, index)=>{
-                                return <Video key={index} peer={peer} ref={otherVideo} videoControls={controlsRef.current} loadingRef={animContainerLoading.current} videoPausedRef={videoPausedRef.current} audioPausedRef={audioPausedRef.current} styleObj={video1Style}/>
-                            })
-                        }
-                    </div>
-             </div>  
-             </div>
+                            <div className="video-controls center-vert" ref={controlsRef} style={{display: "none"}}>
+                                <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current} styleObj={controlsStyle}/>
+                            </div>
+                            
+                            <div  className="video-composition">
+                                <div className="video-pauseContainer"  style={pausedStyle}>
+                                <p className="video-videoPaused normal-text" ref={videoPausedRef}>Peer paused their video</p>
+                                <p className="video-audioPaused normal-text" ref={audioPausedRef}>Peer muted their audio</p>
+                                </div>
+                                
+                                <video muted autoPlay playsInline ref={videoRef} className="video-composition--2" style={video2Style}></video>
+                                {
+                                    peers.map((peer, index)=>{
+                                        return <Video key={index} peer={peer} ref={otherVideo} videoControls={controlsRef.current} loadingRef={animContainerLoading.current} videoPausedRef={videoPausedRef.current} audioPausedRef={audioPausedRef.current} styleObj={video1Style}/>
+                                    })
+                                }
+                            </div>
+                    </div>  
+                </div>
+
+                {/* {body}
+            {downloadPrompt} */}
+                {fileShare}
+        </div>
 
      );
 }
