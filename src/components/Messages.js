@@ -35,7 +35,7 @@ class Messages extends Component {
                                    <img className="message--delete" src={TrashIcon} alt="" onClick={this.deleteMessage} data-id={msg.msgId}/>
                                 </div>
                                 <div className="message message__mine u-margin-bottom">
-                                    <p className="message--userName normal-text u-margin-bottom-small bold-text" style={{display: "inline-block"}}>{msg.id}</p><br/>
+                                    <p className="message--userName normal-text u-margin-bottom-small" style={{display: "inline-block"}}>{msg.id}</p><br/>
                                     <p className="normal-text message--text" style={{display: "inline-block"}}>{msg.msg}</p> 
                                 </div>
                             </div> 
@@ -43,7 +43,7 @@ class Messages extends Component {
                        return (
                         <div key={index} style={{display: "flex", justifyContent: "flex-start"}}>  
                             <div className="message message__peer u-margin-bottom">
-                                        <p className="message--userName normal-text u-margin-bottom-small bold-text" style={{display: "inline-block"}}>{msg.id}</p><br/>
+                                        <p className="message--userName normal-text u-margin-bottom-small" style={{display: "inline-block"}}>{msg.id}</p><br/>
                                         <p className="normal-text message--text" style={{display: "inline-block"}}>{msg.msg}</p> 
                                 </div>
                         </div>

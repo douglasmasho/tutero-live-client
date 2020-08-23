@@ -4,17 +4,13 @@ import animExpand from "../animations/expand.json";
 import animSend from "../animations/send.json";
 import  {socketContext} from "../Context/socketContext";
 import Messages from "./Messages";
-import {v4 as uuidv4} from "uuid";
 
 
 
 const LiveChat = (props) => {
-    // const animContainerExpand = useRef();
-    // const animRefExpand = useRef();
     const animContainerSend = useRef();
     const animRefSend = useRef();
     const chatContainer = useRef();
-    // const [isExpanded, setIsExpanded] = useState(false);
     const socket = useContext(socketContext);
     const textAreaRef = useRef();
     const [msgArray, setMsgArray] = useState([]);

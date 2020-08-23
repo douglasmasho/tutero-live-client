@@ -11,8 +11,8 @@
     position: relative; 
     z-index: 200;
 
-    &--icon{
-        width: 3rem;
+    &__icon{
+        width: 2.5rem;
         position: absolute;
         top: 50%;
         left: 0%;
@@ -25,7 +25,7 @@
         opacity: 0;
     }
     &:hover{
-         width: 20rem;
+         width: 18rem;
          .controls--expanded{
             display: flex;
             opacity: 1;
@@ -38,7 +38,7 @@
          }
     }
     &--label{
-        margin: 1rem;
+        margin: 0.5rem;
     }
 
 }

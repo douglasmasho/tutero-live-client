@@ -52,3 +52,13 @@ body{
   /* background-color: green; */
   /* height: 30px; */
 }
+
+::webkit-scrollbar{
+  width: 20px;
+
+  &-thumb{
+    border-radius: 30px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#ff8a00), to(#da1b60));
+    box-shadow: inset 2px 2px 2px rgba(255,255,255, 0.25), inset -2px -2px -2px rgba(0,0,0,0.25)
+  }
+}

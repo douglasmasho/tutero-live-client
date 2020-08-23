@@ -14,7 +14,8 @@ const FileShare = (props) => {
           sendFilePrompt = useRef(),
           [file, setFile] = useState(),
           fileNameRef = useRef(""),
-          [gotFile, setGotFile] = useState(false);
+          [gotFile, setGotFile] = useState(false),
+          fileSentRef = useRef();
 
 
 
@@ -29,15 +30,6 @@ const FileShare = (props) => {
             }
          }
 
-            // if (data.toString().includes("done")) {
-            //     setGotFile(true);
-            //     const parsed = JSON.parse(data);
-            //     fileNameRef.current = parsed.fileName;
-            // } else {
-            //     worker.postMessage(data);
-            // }
-
-
             
         const download = ()=> {
             setGotFile(false);
@@ -50,13 +42,10 @@ const FileShare = (props) => {
                 stream.pipeTo(fileStream);
             })
 
-            // setGotFile(false);
-            // worker.postMessage("download");
-            // worker.addEventListener("message", event => {
-            //     const stream = event.data.stream();
-            //     const fileStream = streamSaver.createWriteStream(fileNameRef.current);
-            //     stream.pipeTo(fileStream);
-            // })
+        }
+
+        const dontDownload = ()=>{
+            setGotFile(false);
         }
     
         const selectFile = (e)=> {
@@ -83,23 +72,8 @@ const FileShare = (props) => {
                      handleReading(obj.done, obj.value)
                 })
             }
-            // const stream = file.stream();
-            // const reader = stream.getReader();
-            // reader.read().then(obj => {
-            //     handlereading(obj.done, obj.value);
-            // });
-    
-            // function handlereading(done, value) {
-            //     if (done) {
-            //         peer.write(JSON.stringify({ done: true, fileName: file.name }));
-            //         return;
-            //     }
-    
-            //     peer.write(value);
-            //     reader.read().then(obj => {
-            //         handlereading(obj.done, obj.value);
-            //     })
-            // }
+
+            fileSentRef.current.style.display = "block";
         }     
 
 
@@ -137,19 +111,22 @@ const FileShare = (props) => {
      })
 
     return ( 
-        <div style={{height: "100vh"}}>
-            <div className="loading" ref={animContainerLoading}>
+        <div>
+            <div className="loading" ref={animContainerLoading} style={{backgroundColor: "#1e1e1e"}}>
             </div>
 
-            <div>
-                <input onChange={selectFile} type="file" />
-                <button onClick={sendFile} style={{display: "none"}} ref={sendFilePrompt}>Send file</button> 
+            <div className="fileshare--container">
+                <input onChange={selectFile} type="file" className="fileshare--input"/>
+                <button onClick={sendFile} style={{display: "none"}} ref={sendFilePrompt} className="fileshare--button">Send file</button> 
+                <p className="fileshare--message" style={{display: "none"}} ref={fileSentRef}>The file has been sent</p>
                 {/* only let the button appear when there is a file available*/}
             </div>
 
             <div ref={downloadPrompt}>
-                <span>You have received a file. Would you like to download the file?</span>
-                <button onClick={download}>Yes</button>
+                <span className="fileshare--message">Your peer sent you a File, would you like to download it?</span>
+                <button onClick={download}  className="fileshare--button">Yes</button>
+                <button onClick={dontDownload}  className="fileshare--button">No</button>
+
             </div>
 
         </div>

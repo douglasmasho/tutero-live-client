@@ -9,8 +9,7 @@ import LiveChat from './LiveChat';
 import {socketContext} from "../Context/socketContext";
 import Icon from "./Icon";
 import Middle from './Middle';
-import streamSaver from "streamsaver";
-import FileShare from './FileShare';
+import Logo from "../assets/logo.svg";
 
 const worker = new Worker("../worker.js");
 
@@ -31,7 +30,8 @@ const Room = (props) => {
           [hasJoined, setHasJoined] = useState(false),
           videoContainerRef = useRef(),
           hamburgerRef = useRef(),
-          [connectionMade, setConnectionMade] = useState(false);
+          [connectionMade, setConnectionMade] = useState(false),
+          logoRef = useRef();
           
 
     socketRef.current = useContext(socketContext);
@@ -50,7 +50,7 @@ const Room = (props) => {
                 break;
            default: return
         }
-        //this code causes a error, just gonna stop the video and audio manually on the other peer.
+        //this code causes a error, resort to stopping the video and audio manually on the other peer.
         // console.log(stream.getAudioTracks()[0]);
         // peers[0].removeTrack(stream.getAudioTracks()[0], stream);
     }
@@ -168,95 +168,6 @@ const Room = (props) => {
 
         })
     },[]);
-
-
-      /////////////////////////////////////////////////////
-    //   const connectionMade = props.connectionMade,
-    //   const animContainerLoading = useRef(),
-    //   const animRefLoading = useRef(),
-    //   const downloadPrompt = useRef(),
-    //   const sendFilePrompt = useRef(),
-    //   [file, setFile] = useState(),
-    //   fileNameRef = useRef(""),
-    //   [gotFile, setGotFile] = useState(false);
-
-
-
-    //   function handleReceivingData(data) {
-    //     if (data.toString().includes("done")) {
-    //         setGotFile(true);
-    //         const parsed = JSON.parse(data);
-    //         fileNameRef.current = parsed.fileName;
-    //     } else {
-    //         worker.postMessage(data);
-    //     }
-    // }
-
-    // function download() {
-    //     setGotFile(false);
-    //     worker.postMessage("download");
-    //     worker.addEventListener("message", event => {
-    //         const stream = event.data.stream();
-    //         console.log(event.data)
-    //         const fileStream = streamSaver.createWriteStream(fileNameRef.current);
-    //         stream.pipeTo(fileStream);
-    //     })
-    // }
-
-    // function selectFile(e) {
-    //     setFile(e.target.files[0]);
-    // }
-
-    // function sendFile() {
-    //     const peer = peers[0];
-    //     const stream = file.stream();
-    //     const reader = stream.getReader();
-
-    //     reader.read().then(obj => {
-    //         handlereading(obj.done, obj.value);
-    //     });
-
-    //     function handlereading(done, value) {
-    //         if (done) {
-    //             peer.write(JSON.stringify({ done: true, fileName: file.name }));
-    //             return;
-    //         }
-
-    //         peer.write(value);
-    //         reader.read().then(obj => {
-    //             handlereading(obj.done, obj.value);
-    //         })
-    //     }
-
-    // }
-
-    // let body;
-    // if (connectionMade) {
-    //     body = (
-    //         <div>
-    //             <input onChange={selectFile} type="file" />
-    //             <button onClick={sendFile}>Send file</button>
-    //         </div>
-    //     );
-    // } else {
-    //     body = (
-    //         <h1>Once you have a peer connection, you will be able to share files</h1>
-    //     );
-    // }
-
-    // let downloadPrompt;
-    // if (gotFile) {
-    //     downloadPrompt = (
-    //         <div>
-    //             <span>You have received a file. Would you like to download the file?</span>
-    //             <button onClick={download}>Yes</button>
-    //         </div>
-    //     );
-    // }
-
-
-      /////////////////////////////////////////////////////        
-
     const createPeer = (recipient, stream)=>{
         //create a peer
         const peer = new Peer({initiator: true, trickle: false, stream: stream});
@@ -298,7 +209,7 @@ const Room = (props) => {
     switch(mode){
         case "feature":
             containerStyle = {
-                width: "20%",
+                width: "15%",
                 display: "flex",
                 flexDirection: "column"
             };
@@ -341,11 +252,11 @@ const Room = (props) => {
     let icons;
      if(hasJoined){
         icons = <>
-                    <Icon feature={"screenShare"}  featureMode={initFeatureMode}/>
-                    <Icon feature={"ytShare"}  featureMode={initFeatureMode}/>
-                    <Icon feature={"liveCanvas"} featureMode={initFeatureMode}/>
-                    <Icon feature={"fileShare"}  featureMode={initFeatureMode}/>
-                    <Icon feature={"liveChat"} featureMode={initFeatureMode}/>
+                    <Icon feature={"screenShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
+                    <Icon feature={"ytShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
+                    <Icon feature={"liveCanvas"} featureMode={initFeatureMode} logo={logoRef.current}/>
+                    <Icon feature={"fileShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
+                    <Icon feature={"liveChat"} featureMode={initFeatureMode} logo={logoRef.current}/>
                </>
     }else{
         icons = null
@@ -354,15 +265,13 @@ const Room = (props) => {
     ///do he same thing for the middle div component
     let middle
     if(hasJoined){
-        middle =  <Middle currentFeature={currentFeature} defaultMode={initDefaultMode} mode={mode}/>
+        middle =  <Middle currentFeature={currentFeature} defaultMode={initDefaultMode} mode={mode} peers={peers} connectionMade={connectionMade}/>
     }else{
         middle = null
     }
+    
 
-    let fileShare
-    if(peers.length === 1){
-        fileShare = <FileShare peer={peers[0]} connectionMade={connectionMade}/>
-    }
+
 
 
     return ( 
@@ -370,9 +279,9 @@ const Room = (props) => {
 
                 <div className="row" style={{justifyContent: "space-between", height: "100%", padding: 0}}>
                     <div className="features--tab">
+                        <img src={Logo} alt="logo" className="features--logo" ref={logoRef}/>
                         {icons}
                     </div>
-
                     {middle}
                     <div className="video-container" style={containerStyle}>
                         <div className="loading" ref={animContainerLoading}>
@@ -396,10 +305,6 @@ const Room = (props) => {
                             </div>
                     </div>  
                 </div>
-
-                {/* {body}
-            {downloadPrompt} */}
-                {fileShare}
         </div>
 
      );

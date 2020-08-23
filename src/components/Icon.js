@@ -7,6 +7,7 @@ import liveChat from "../assets/from xd/liveChat.svg";
 
 const Icon = (props) => {
     const feature = props.feature;
+    const logo = props.logo
     let src;
     switch(feature){
         case "screenShare":
@@ -24,9 +25,19 @@ const Icon = (props) => {
         case "liveChat":
             src = liveChat;                
     }
+
+    const showLogo = ()=>{
+        logo.style.opacity = 1;
+        logo.style.width = "12rem";
+    }
+
+    const closeLogo = ()=>{
+        logo.style.opacity = 0;
+        logo.style.width = 0;
+    }
     //const callBack = props.callBack;
     return ( 
-        <div className="features--icon u-margin-bottom" onClick={(e)=>{
+        <div className="features--icon" onClick={(e)=>{
             props.featureMode(feature);
             //remove active from the active element
             const current = document.querySelector(".active");
@@ -35,7 +46,7 @@ const Icon = (props) => {
             }
             e.currentTarget.classList.add("active");
 
-        }}>
+        }} onMouseOver={showLogo} onMouseOut={closeLogo}>
             <img src={src} alt=""/>
             <p>{feature}</p>
         </div>
