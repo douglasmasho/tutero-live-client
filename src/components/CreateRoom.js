@@ -10,7 +10,7 @@ const CreateRoom = (props) => {
     }
     return ( 
         <div>
-            <button onClick={createRoom}>Create Room</button>
+            <button onClick={createRoom} className="button" id="btn-golive">Go live</button>
         </div>
      );
 }

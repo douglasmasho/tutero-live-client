@@ -14,7 +14,7 @@ const Middle = (props) => {
 
 
     useEffect(()=>{
-        console.log(props.currentFeature);
+        // console.log(props.currentFeature);
     })
 
     let width, opacity ,content, crossWidth, title;

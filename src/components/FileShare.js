@@ -107,7 +107,6 @@ const FileShare = (props) => {
         }else{
             sendFilePrompt.current.style.display = "none";
         }
-
      })
 
     return ( 

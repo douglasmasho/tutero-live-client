@@ -10,8 +10,8 @@ import {socketContext} from "../Context/socketContext";
 import Icon from "./Icon";
 import Middle from './Middle';
 import Logo from "../assets/logo.svg";
-
-const worker = new Worker("../worker.js");
+import YtShare from './YtShare';
+// const worker = new Worker("../worker.js");
 
 const Room = (props) => {
     const roomID = props.routeArgs.match.params.roomID,
@@ -269,6 +269,13 @@ const Room = (props) => {
     }else{
         middle = null
     }
+
+    let ytShare;
+    if(connectionMade && peers.length === 1){
+        ytShare = <YtShare peer={peers[0]} />
+    }else{
+        ytShare = null
+    }
     
 
 
@@ -305,6 +312,8 @@ const Room = (props) => {
                             </div>
                     </div>  
                 </div>
+
+               {ytShare}
         </div>
 
      );

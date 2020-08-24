@@ -56,6 +56,9 @@
 
         &:hover{
            width: 17rem;
+           -webkit-box-shadow: 2px 2px 8px -3px rgba(0, 0, 0, 0.2);
+           -moz-box-shadow: 2px 2px 8px -3px rgba(0, 0, 0, 0.2);
+           box-shadow: 2px 2px 8px -3px rgba(0, 0, 0, 0.2);
            .middle{
                width: 80% !important;
            }
