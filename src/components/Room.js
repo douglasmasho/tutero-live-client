@@ -141,6 +141,9 @@ const Room = (props) => {
                 // //remove the peer from the array in state.
                 setPeers(peers=> (peers.filter(p=>(p !== discPeer)) ) )
                 discPeer.destroy();
+                // console.log(document.querySelector(".ytScript"));
+                // document.querySelector(".ytScript").remove();
+                // console.log(document.querySelector(".ytScript"));
                 //put a disconnected
             })
 
@@ -270,13 +273,7 @@ const Room = (props) => {
         middle = null
     }
 
-    let ytShare;
-    if(connectionMade && peers.length === 1){
-        ytShare = <YtShare peer={peers[0]} />
-    }else{
-        ytShare = null
-    }
-    
+
 
 
 
@@ -313,7 +310,7 @@ const Room = (props) => {
                     </div>  
                 </div>
 
-               {ytShare}
+               {/* {ytShare} */}
         </div>
 
      );

@@ -2,9 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import LiveChat from './LiveChat';
 import Cross from "../assets/cross.svg";
 import FileShare from "./FileShare";
-
+import YtShare from "./YtShare"
 const Middle = (props) => {
     const fileShareRef = useRef();
+    const ytShareRef = useRef();
 
     const removeCurrentFeature = ()=>{
         if(document.querySelector(".features__visible")){
@@ -38,12 +39,18 @@ const Middle = (props) => {
                 //add the active class to this feature
                 fileShareRef.current.classList.add("features__visible");  
             break;
-
-            default:
+        
+        case "ytShare":
+                 title = "YT Share";
+                removeCurrentFeature();
+                ytShareRef.current.classList.add("features__visible");  
+             break;
+        default:
                 currentComponent = null;
                 removeCurrentFeature();   
                 break; 
     }
+
     switch(props.mode){
         case "default":
             width = 0;
@@ -60,11 +67,19 @@ const Middle = (props) => {
     }
 
     let fileShare
-    if(props.peers.length === 1){
+    if(props.connectionMade && props.peers.length === 1){
         fileShare = <FileShare peer={props.peers[0]} connectionMade={props.connectionMade}/>
     }else{
         fileShare = <h4 className="fileshare--connect">You can share files once a peer has connected</h4>
     }
+
+    let ytShare;
+    if(props.peers.length === 1){
+        ytShare = <YtShare peer={props.peers[0]} connectionMade={props.connectionMade} />
+    }else{
+        ytShare = <h4 className="fileshare--connect">You can sync-watch youtube videos once a peer has connected</h4>
+    }
+    
     return ( 
         <div style={{width, opacity}} className="middle">
             <div className="middle--header">
@@ -77,6 +92,10 @@ const Middle = (props) => {
             {content}
             <div style={{display: "none"}} ref={fileShareRef}>
                {fileShare}
+            </div>
+
+            <div style={{display: "none"}} ref={ytShareRef}>
+                {ytShare}
             </div>
         </div>
      );
