@@ -141,10 +141,6 @@ const Room = (props) => {
                 // //remove the peer from the array in state.
                 setPeers(peers=> (peers.filter(p=>(p !== discPeer)) ) )
                 discPeer.destroy();
-                // console.log(document.querySelector(".ytScript"));
-                // document.querySelector(".ytScript").remove();
-                // console.log(document.querySelector(".ytScript"));
-                //put a disconnected
             })
 
             socketRef.current.on("hello world", data=>{

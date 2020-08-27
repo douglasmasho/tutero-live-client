@@ -1,57 +1,37 @@
 import React, {useRef, useEffect, useState} from 'react';
-import lottie from "lottie-web";
-import animLoading from "../animations/loading.json";
 import Plus from "../assets/from xd/plus.svg";
 
 
 ///making use of the youtube player api
 const YtShare = (props) => {
     const ytPlayer = useRef(),
-          [videoID, setVideoID] = useState(),
+        //   [videoLink, setVideoID] = useState(""),
            peer = props.peer,
            secondsInput = useRef(),
            minutesInput = useRef(),
            playlistInput = useRef(),
+           videoInput = useRef(),
            positionInput = useRef(),
-           animContainerLoading = useRef(),
            plErrorRef = useRef(),
+           vErrorRef = useRef(),
            loadModalRef = useRef(),
-           [isApiReady, setIsApiReady] = useState(false),
-        //    animRefLoading = useRef(),
            API_KEY = "AIzaSyDxDypFD7OMDH4-lPrs--alG88QJd6HXs4",
-           playerRef = useRef(),
            loadPlayerbtn = useRef();
-    // const [mode, setMode] = useState() ///this state will be used to specify if the session is in video/playlist mode, these modes will determine what controls are visible;
 
 
     useEffect(()=>{
-         lottie.loadAnimation({
-            container: animContainerLoading.current,
-            animationData: animLoading,
-            loop: true,
-        });
-
         const tag = document.createElement("script"); ///create a new script tag
-        tag.classList.add("ytScript");
         tag.src = "https://www.youtube.com/iframe_api";
         //find the first script tag
         const firstScript = document.getElementsByTagName("script")[0];
         //place the ytScript on top of the first script tag
         firstScript.parentNode.insertBefore(tag,firstScript)
         //assign a callback function when the api is ready
-        window.onYouTubeIframeAPIReady = ()=>{
-            setIsApiReady(true);
-            loadYTVideoPlayer();
-        }
+        window.onYouTubeIframeAPIReady = loadYTVideoPlayer
         //set up listeners for incoming data
         peer.on("data", handleIncomingData);
     }, [])
     
-    useEffect(()=>{
-        if(props.connectionMade){
-            animContainerLoading.current.style.display = "none"
-          }
-    }, [props.connectionMade]);
 
     useEffect(()=>{
         if(!document.querySelector("iframe")){
@@ -73,7 +53,7 @@ const YtShare = (props) => {
                 ytPlayer.current.pauseVideo();
                 break;
             case "video":
-                ytPlayer.current.loadVideoById(obj.data.split("=")[1]);  
+                ytPlayer.current.loadVideoById(obj.data);  
                 ytPlayer.current.playVideo();
                 break;
             case "goTo":
@@ -89,6 +69,9 @@ const YtShare = (props) => {
             case "previous":
                  ytPlayer.current.previousVideo();
                  break;
+            case "stopSession":
+                props.setIsytShareOn(false);
+                break;     
             case "position":
                 ytPlayer.current.playVideoAt(obj.index);  
             // default: null;
@@ -122,11 +105,40 @@ const YtShare = (props) => {
         ytPlayer.current.playVideo();
     }
 
-    const loadVideo = ()=>{
-        peer.send(JSON.stringify({type: "video", data: videoID}));
-        //load the video on the ytPlayer object with the current videoID
-        ytPlayer.current.loadVideoById(videoID.split("=")[1]); //get the part before the "=" sign
-        
+    const loadVideo = (e)=>{
+        e.preventDefault();
+        const videoLink = videoInput.current.value;
+
+        function loadVid(videoID){
+           peer.send(JSON.stringify({type: "video", data: videoID}));
+            //load the video on the ytPlayer object with the current videoLink
+            ytPlayer.current.loadVideoById(videoID); 
+        }
+
+        let videoID, index;
+        if(videoLink.includes("youtube.com")){
+            vErrorRef.current.style.display = "none";
+            if(videoLink.includes("/v/")){
+                // videoID = videoLink.split("/")[4].slice(0,11);
+                index = videoLink.split("/").indexOf("v");
+                videoID = videoLink.split("/")[index + 1].slice(0,11)
+                loadVid(videoID);
+            }else if(videoLink.includes("/embed/")){
+                index = videoLink.split("/").indexOf("embed");
+                videoID = videoLink.split("/")[index + 1].slice(0,11)
+                loadVid(videoID);
+            }else{
+                videoID = videoLink.split("=")[1].slice(0,11);
+                loadVid(videoID);
+            }
+        }else if(videoLink.includes("youtu.be")){
+            vErrorRef.current.style.display = "none";
+            index = videoLink.split("/").indexOf("youtu.be");
+            videoID = videoLink.split("/")[index + 1].slice(0,11)
+            loadVid(videoID);
+        }else{
+            vErrorRef.current.style.display = "block";
+        }
     }
 
     const goToTime = (event)=>{
@@ -195,25 +207,32 @@ const YtShare = (props) => {
         ytPlayer.current.playVideoAt(index);
     }
 
+    const stopSession = ()=>{
+        props.setIsytShareOn(false);
+        //send message to peer so they can also stop their session
+        peer.send(JSON.stringify({type: "stopSession"}))
+    }
 
 
     return ( 
         <div>  
 
-            <div className="loading" ref={animContainerLoading} style={{backgroundColor: "#1e1e1e"}}>
-            </div>
 
            <div className="center-hrz u-margin-top" style={{position: "relative"}}>
                <div>
-               <div id="player" ref={playerRef}/>
+               <div id="player"/>
                </div>
               <button onClick={loadYTVideoPlayer} ref={loadPlayerbtn} style={{display: "none"}}>Show yt player</button>
               <button className="button__add"><img src={Plus} alt=""/></button>
            </div>
 
            <div className="modal " ref={loadModalRef}>
-                    <input type="text" placeholder="video link" onChange={e=>setVideoID(e.target.value)}/> {/** ///////////////////////*/}
-                    <button onClick={loadVideo}>Load Video</button>
+               <form onSubmit={loadVideo}>
+                    <input type="text" placeholder="video link" ref={videoInput} required/>
+                    <button type="submit">Load Video</button>
+                    <p style={{color: "red", display: "none"}} ref={vErrorRef}>That is not a valid video link</p>
+               </form>
+
 
                     <form onSubmit={loadPlaylist}>
                         <input type="text" placeholder="playlist link" ref={playlistInput} required/>
@@ -228,8 +247,8 @@ const YtShare = (props) => {
             <button onClick={getVideo}>Get current video link</button>
 
             <form onSubmit={goToTime}>
-                <input type="number" required placeholder="minutes" ref={minutesInput}/>
-                <input type="number" required placeholder="seconds" ref={secondsInput} max="59"/>
+                <input type="number" required placeholder="minutes" ref={minutesInput} min="0"/>
+                <input type="number" required placeholder="seconds" ref={secondsInput} max="59" min="0"/>
                 <button type="submit">Go to Timestamp</button>
             </form>
 
@@ -244,6 +263,8 @@ const YtShare = (props) => {
                     <input type="number" placeholder="position" ref={positionInput}/>
                     <button type="submit">go to video</button>
                 </form>
+
+                <button onClick={stopSession}>Stop session</button>
             
         </div>
      );

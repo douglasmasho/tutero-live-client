@@ -1,11 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import LiveChat from './LiveChat';
 import Cross from "../assets/cross.svg";
 import FileShare from "./FileShare";
-import YtShare from "./YtShare"
+import YtShare from "./YtShare";
+import {socketContext} from "../Context/socketContext";
 const Middle = (props) => {
-    const fileShareRef = useRef();
-    const ytShareRef = useRef();
+    const fileShareRef = useRef(),
+    ytShareRef = useRef(),
+    [isytShareOn, setIsytShareOn] = useState(true),
+    socketRef = useRef();
+
+    socketRef.current = useContext(socketContext);
 
     const removeCurrentFeature = ()=>{
         if(document.querySelector(".features__visible")){
@@ -13,10 +18,18 @@ const Middle = (props) => {
         }
     }
 
+    const startSession = ()=>{
+        setIsytShareOn(true);
+        //send message to your peer so their ytshre component is rendered
+        socketRef.current.emit("startYTSession", "");
+    }
+
 
     useEffect(()=>{
-        // console.log(props.currentFeature);
-    })
+       socketRef.current.on("startYTSession", data=>{
+        setIsytShareOn(true);
+       })
+    }, [])
 
     let width, opacity ,content, crossWidth, title;
     //content will be dependent on the current feature
@@ -70,14 +83,22 @@ const Middle = (props) => {
     if(props.connectionMade && props.peers.length === 1){
         fileShare = <FileShare peer={props.peers[0]} connectionMade={props.connectionMade}/>
     }else{
-        fileShare = <h4 className="fileshare--connect">You can share files once a peer has connected</h4>
+        fileShare = <h4 className="middle--notice">You can share files once a peer has connected</h4>
     }
 
     let ytShare;
-    if(props.peers.length === 1){
-        ytShare = <YtShare peer={props.peers[0]} connectionMade={props.connectionMade} />
-    }else{
-        ytShare = <h4 className="fileshare--connect">You can sync-watch youtube videos once a peer has connected</h4>
+    if(props.connectionMade && props.peers.length === 1 && isytShareOn){
+        ytShare = <YtShare peer={props.peers[0]} connectionMade={props.connectionMade} setIsytShareOn={setIsytShareOn}/>
+    }else if(!isytShareOn){
+          ytShare = (
+              <div>
+                 <h4 className="middle--notice">The YTShare session has been stopped by you or your peer</h4>
+                 <button onClick={startSession}>Start session</button>
+              </div>
+          )
+    }
+    else{
+        ytShare = <h4 className="middle--notice">You can sync-watch youtube videos once a peer has connected</h4>
     }
     
     return ( 
