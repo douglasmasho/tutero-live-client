@@ -30,8 +30,8 @@ class Video extends Component {
                 // console.log("yefutdutd");
                 // unblur the video
                 this.blurUnblurVid("unblur");
-
-            default: return    
+                break;
+            default: //do nothing    
         }
     }
     pausePlayAud(action){
@@ -40,8 +40,7 @@ class Video extends Component {
             case "pause":
                 video.muted = true;
                 console.log(video.muted);
-                this.showHideNotice("audio", "show");
-                
+                this.showHideNotice("audio", "show");    
                 break;
             case "resume":
                 // video.muted = false;   
@@ -49,8 +48,8 @@ class Video extends Component {
                 // console.log("unnnnnnmuttttted");
                 this.showHideNotice("audio", "hide");
                 video.muted = false  
-
-            default: return;
+                break;
+            default: //do nothing;
 
         }
     }
@@ -66,6 +65,8 @@ class Video extends Component {
             case "unblur":
                 className = "video__unblurred" 
                 lastClassName = "video__blurred";
+                break;
+            default: //do nothing;
         }
 
         if(video.classList.contains(lastClassName)){
@@ -90,6 +91,9 @@ class Video extends Component {
                 className = "notice__invisible";
                 lastClassName = "notice__visible";
                 // console.log("hdden")
+                break;
+            default: //do nothing;
+
         }
         console.log(className, lastClassName);
         switch(track){
@@ -113,6 +117,8 @@ class Video extends Component {
                     audioNotice.classList.add(className);    
                     console.log(className, lastClassName);
                 }
+                break;
+            default: //do nothing       
         }
     }
 

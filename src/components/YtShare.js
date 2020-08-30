@@ -1,11 +1,19 @@
-import React, {useRef, useEffect, useState} from 'react';
+import React, {useRef, useEffect, useState, useContext} from 'react';
 import Plus from "../assets/from xd/plus.svg";
+import Play from "../assets/from xd/play.svg";
+import Pause from "../assets/from xd/pause.svg";
+import Unmute from "../assets/from xd/unmute.svg";
+import Mute from "../assets/from xd/mute.svg";
+import Prev from "../assets/from xd/prev.svg";
+import Next from "../assets/from xd/next.svg";
+import Link from "../assets/from xd/link.svg";
+import lottie from "lottie-web";
+import animLoading from "../animations/loading.json";
+import  {socketContext} from "../Context/socketContext";
 
 
-///making use of the youtube player api
 const YtShare = (props) => {
     const ytPlayer = useRef(),
-        //   [videoLink, setVideoID] = useState(""),
            peer = props.peer,
            secondsInput = useRef(),
            minutesInput = useRef(),
@@ -14,9 +22,20 @@ const YtShare = (props) => {
            positionInput = useRef(),
            plErrorRef = useRef(),
            vErrorRef = useRef(),
-           loadModalRef = useRef(),
            API_KEY = "AIzaSyDxDypFD7OMDH4-lPrs--alG88QJd6HXs4",
-           loadPlayerbtn = useRef();
+           loadPlayerbtn = useRef(),
+           modalRef = useRef(),
+           addBtn = useRef(),
+           overlayRef = useRef(),
+           ytControlsRef = useRef(),
+           playBtnRef = useRef(),
+           [myIframeReady, setmyIframeReady] = useState(false),
+           [peerIframeReady, setPeerIframeReady] = useState(false),
+        //    [isLoading, setIsloading] = useState(false);
+           pauseBtnRef = useRef(),
+           playerRef = useRef(),
+           socket = useContext(socketContext),
+           bottomDiv = useRef();
 
 
     useEffect(()=>{
@@ -27,34 +46,94 @@ const YtShare = (props) => {
         //place the ytScript on top of the first script tag
         firstScript.parentNode.insertBefore(tag,firstScript)
         //assign a callback function when the api is ready
-        window.onYouTubeIframeAPIReady = loadYTVideoPlayer
-        //set up listeners for incoming data
+        window.onYouTubeIframeAPIReady = loadYTVideoPlayer;
+         
+        
+        //set up listeners for incoming data only if the api is ready
         peer.on("data", handleIncomingData);
+
+        document.querySelectorAll(".ytControl").forEach(control=>{
+            control.addEventListener("click", controlVid)
+        });
+
+        const callBack = (mutationList)=>{
+            // console.log(mutationList[0]);
+            if(mutationList[0].type === "childList"){
+                setmyIframeReady(true);
+            }
+        }
+       const mutationObs = new MutationObserver(callBack);
+
+       const config = {
+           attributes: true,
+           childList: true,
+           subtree: true
+       }
+
+       mutationObs.observe(playerRef.current, config);
+
+       //listen to peerIframeReady message
+       socket.on("peerIframeReady", data=>{
+        setPeerIframeReady(true);
+       })
     }, [])
     
 
     useEffect(()=>{
-        if(!document.querySelector("iframe")){
-            loadPlayerbtn.current.style.display = "block";
-            // console.log("iuiuhiu")
-        }else {
+        if(myIframeReady){
             loadPlayerbtn.current.style.display = "none";
+            //send message to peer to tell them that your iframe is ready
+            socket.emit("myIframeReady","")
+        }else{
+            loadPlayerbtn.current.style.display = "block";
         }
-        console.log(document.querySelector("iframe"))
-    })
+    }, [myIframeReady])
+
+    useEffect(()=>{
+        //make sure control only show up when you and your peers Iframes have loaded
+        if(myIframeReady && peerIframeReady){
+            bottomDiv.current.style.display = "block";
+            addBtn.current.style.display = "block";
+            ytControlsRef.current.style.display = "flex";
+        }else{
+            bottomDiv.current.style.display = "none";
+            addBtn.current.style.display = "none";
+            ytControlsRef.current.style.display = "none";
+        }
+    }, [myIframeReady, peerIframeReady])
+
+    const closeModal = ()=>{
+        modalRef.current.classList.remove("active");
+        overlayRef.current.classList.remove("active");   
+    }
+
+    const openModal = ()=>{ 
+        modalRef.current.classList.add("active");
+        overlayRef.current.classList.add("active");   
+    }
+
 
     const handleIncomingData = (data)=>{
         const obj = JSON.parse(data);
         switch(obj.type){
             case "play":
                 ytPlayer.current.playVideo();
+                if(document.querySelector(".activePP")){
+                    document.querySelector(".activePP").classList.remove("activePP")
+                }
+                playBtnRef.current.classList.add("activePP");
                 break;
             case "pause":
                 ytPlayer.current.pauseVideo();
+                if(document.querySelector(".activePP")){
+                    document.querySelector(".activePP").classList.remove("activePP")
+                }
+                pauseBtnRef.current.classList.add("activePP");
                 break;
             case "video":
                 ytPlayer.current.loadVideoById(obj.data);  
                 ytPlayer.current.playVideo();
+                addActive("pp", playBtnRef.current);
                 break;
             case "goTo":
                 ytPlayer.current.seekTo(obj.time, true);
@@ -62,6 +141,7 @@ const YtShare = (props) => {
             case "playlist":
                 ytPlayer.current.loadPlaylist(obj.string);
                 ytPlayer.current.playVideo();
+                addActive("pp", playBtnRef.current);
                 break;
             case "next":
                  ytPlayer.current.nextVideo();  
@@ -74,7 +154,8 @@ const YtShare = (props) => {
                 break;     
             case "position":
                 ytPlayer.current.playVideoAt(obj.index);  
-            // default: null;
+                break;
+            default: ///do nothing
         }
     }
 
@@ -84,7 +165,8 @@ const YtShare = (props) => {
         const player = new window.YT.Player("player", { //first arg ==> id of the div you want ot containt the video
            ///second arg: options which include dimensions
             height: "390",
-            width: "640"
+            width: "640",
+            controls: false
         });
         //reference the ytPlayer for future use
         ytPlayer.current = player;
@@ -97,7 +179,6 @@ const YtShare = (props) => {
         ytPlayer.current.pauseVideo();
     }
 
-    
     const playVideo = ()=>{    
         //call the peer to play their video
         peer.send(JSON.stringify({type: "play"}))
@@ -138,7 +219,15 @@ const YtShare = (props) => {
             loadVid(videoID);
         }else{
             vErrorRef.current.style.display = "block";
+            setTimeout(()=>{
+                vErrorRef.current.style.display = "none";
+            },2000)
         }
+
+        //close the modal
+        closeModal();
+        //make the play button active
+        addActive("pp", playBtnRef.current);
     }
 
     const goToTime = (event)=>{
@@ -179,12 +268,20 @@ const YtShare = (props) => {
                 ytPlayer.current.loadPlaylist(videosString, 0,0);
             })
         }else{
-            plErrorRef.current.style.display = "block"
+            plErrorRef.current.style.display = "block";
+            setTimeout(()=>{
+                plErrorRef.current.style.display = "none";
+            },2000)
         }
 
+        
+        //close the modal
+        closeModal();
+        //make the play button active
+        addActive("pp", playBtnRef.current);
     }
 
-    //playlis controls
+    //playlist controls
     const nextVideo = ()=>{
         peer.send(JSON.stringify({type: "next"}))
         ytPlayer.current.nextVideo();
@@ -199,6 +296,7 @@ const YtShare = (props) => {
         const url = ytPlayer.current.getVideoUrl();
         alert(url)//instead of an alert, open a modal with an anchor tag of the link
     }
+
     const goToPlaylistVideo = (event)=>{
         event.preventDefault();
         const index = parseInt(positionInput.current.value) - 1;
@@ -207,6 +305,14 @@ const YtShare = (props) => {
         ytPlayer.current.playVideoAt(index);
     }
 
+    const muteVideo = ()=>{
+        ytPlayer.current.mute();
+    }
+
+    const unMuteVideo = ()=>{
+        ytPlayer.current.unMute();
+    } 
+
     const stopSession = ()=>{
         props.setIsytShareOn(false);
         //send message to peer so they can also stop their session
@@ -214,58 +320,131 @@ const YtShare = (props) => {
     }
 
 
+    const controlVid = (event)=>{
+        switch(event.currentTarget.dataset.function){
+            case "play":
+                playVideo();
+                addActive("pp", event.currentTarget)
+                break;
+            case "pause":
+                stopVideo();
+                addActive("pp", event.currentTarget)
+                break;
+            case "unmute":
+                //unmute the vid;
+                unMuteVideo();
+                addActive("mu", event.currentTarget)
+                break;
+            case "mute":
+                //mute the vid
+                muteVideo();
+                addActive("mu", event.currentTarget)
+                break;
+            case "prev":
+                previousVideo();
+                break;
+            case "next":
+                nextVideo();
+                break;
+            case "link":
+                getVideo();
+                break;
+            default: //do nothing           
+        }
+
+        // event.currentTarget.classList.add("activeControl");
+        // console.log(event.currentTarget)
+    }
+
+    const addActive = (type, element)=>{
+        //to add active classes to the control depending on the type
+        switch(type){
+            case "pp":
+                if(document.querySelector(".activePP")){
+                    document.querySelector(".activePP").classList.remove("activePP")
+                }
+                element.classList.add("activePP");
+                break;
+            case "mu":    
+                if(document.querySelector(".activeMU")){
+                    document.querySelector(".activeMU").classList.remove("activeMU");
+                }
+                element.classList.add("activeMU");
+        }
+    }
+
     return ( 
         <div>  
 
-
-           <div className="center-hrz u-margin-top" style={{position: "relative"}}>
+           <div className="center-hrz u-margin-top u-margin-bottom" style={{position: "relative"}}>
                <div>
-               <div id="player"/>
+                    <div id="ytVideo" ref={playerRef}>
+                        <div id="player" />
+                    </div>
+
+                    <div className="row" ref={ytControlsRef} style={{justifyContent: "space-evenly"}}>
+                        {/* <div className="ytControl" data-function="play" ref={playBtnRef}><img src={Play} alt="" className="ytControl--icon"/></div>
+                         */}
+                        
+                        <div className="ytControl" data-function="play" ref={playBtnRef}><ion-icon name="play-outline" className=" ytControl--icon"></ion-icon></div>
+                        <div className="ytControl"  data-function="pause" ref={pauseBtnRef}><ion-icon name="pause-outline" className="ytControl--icon"></ion-icon></div>
+                        <div className="ytControl"  data-function="unmute"><ion-icon name="volume-high-outline" className="ytControl--icon"></ion-icon></div>
+                        <div className="ytControl"  data-function="mute"><ion-icon name="volume-mute-outline" className="ytControl--icon"></ion-icon></div>
+                        <div className="ytControl"  data-function="prev"><ion-icon name="play-skip-back-outline" className="ytControl--icon"></ion-icon></div>
+                        <div className="ytControl"  data-function="next"><ion-icon name="play-skip-forward-outline" className="ytControl--icon"></ion-icon></div>
+                        <div className="ytControl"  data-function="link"><ion-icon name="link-outline" className="ytControl--icon"></ion-icon></div>
+                    </div>
                </div>
+
               <button onClick={loadYTVideoPlayer} ref={loadPlayerbtn} style={{display: "none"}}>Show yt player</button>
-              <button className="button__add"><img src={Plus} alt=""/></button>
+              <button className="button__add" onClick={openModal} ref={addBtn}><img src={Plus} alt=""/></button>
            </div>
 
-           <div className="modal " ref={loadModalRef}>
-               <form onSubmit={loadVideo}>
-                    <input type="text" placeholder="video link" ref={videoInput} required/>
-                    <button type="submit">Load Video</button>
-                    <p style={{color: "red", display: "none"}} ref={vErrorRef}>That is not a valid video link</p>
+           <div className="modal " ref={modalRef}> 
+               <button className="close-button" onClick={closeModal}>&times;</button>
+               <form onSubmit={loadVideo} className="form" style={{marginBottom: "4.5rem"}}>
+                   <h4 className="form--header">Load a video</h4>
+                    <div className="center-hrz--col">
+                            <input type="text" placeholder="video link" ref={videoInput} className="input--text u-margin-bottom-small" required/>
+                            <p className="bigger-text u-margin-bottom-small" style={{color: "white", display: "none", fontWeight: "lighter" }} ref={vErrorRef}>That is not a valid video link</p>
+                            <button className="button normal-text" type="submit">Load Video</button>
+                    </div>
                </form>
-
-
-                    <form onSubmit={loadPlaylist}>
-                        <input type="text" placeholder="playlist link" ref={playlistInput} required/>
-                        <button type="submit">Load playlist</button>
-                        <p style={{color: "red", display: "none"}} ref={plErrorRef}>That is not a valid playlist link</p>
-                    </form>
-           </div>
-           <div className="overlay"></div>
-
-            <button onClick={stopVideo}>Stop Video</button>
-            <button onClick={playVideo}>Play Video</button>
-            <button onClick={getVideo}>Get current video link</button>
-
-            <form onSubmit={goToTime}>
-                <input type="number" required placeholder="minutes" ref={minutesInput} min="0"/>
-                <input type="number" required placeholder="seconds" ref={secondsInput} max="59" min="0"/>
-                <button type="submit">Go to Timestamp</button>
-            </form>
-
-                {/*this div must only appear when we go into playlist mode*/}
-                <h2>Playlist controls</h2>
-
-                <button onClick={nextVideo}>Next video</button>
-                <button onClick={previousVideo}>Previous Video</button>
-
-                <form onSubmit={goToPlaylistVideo}>
-                    <h3>Play video at playlist position</h3>
-                    <input type="number" placeholder="position" ref={positionInput}/>
-                    <button type="submit">go to video</button>
+                <form onSubmit={loadPlaylist} className="form" style={{marginBottom: "4.5rem"}}>  
+                    <h4 className="form--header">Load a playlist</h4>
+                    <div className="center-hrz--col">
+                        <input type="text" placeholder="playlist link" ref={playlistInput} className="input--text u-margin-bottom-small" required/>
+                        <p className="bigger-text u-margin-bottom-small" style={{color: "white", display: "none", fontWeight: "lighter" }} ref={plErrorRef}>That is not a valid playlist link</p> 
+                        <button className="button normal-text" type="submit">Load playlist</button>
+                    </div>  
                 </form>
+           </div>
+           <div className="overlay" ref={overlayRef}></div>
 
-                <button onClick={stopSession}>Stop session</button>
-            
+           <div ref={bottomDiv}>
+                   <form onSubmit={goToTime} className="u-margin-bottom-medium">
+                   <p className="bigger-text u-margin-bottom-small white-text" style={{textAlign: "center"}}>Go to Video timestamp</p>
+                       <div className="center-hrz">
+                            <input type="number" className="input--number" required placeholder="minutes" ref={minutesInput} min="0"/>
+                            <input type="number" className="input--number" required placeholder="seconds" ref={secondsInput} max="59" min="0"/>
+                            <button type="submit" className="button normal-text">Go</button>
+                       </div>
+                    </form>
+
+                    <form onSubmit={goToPlaylistVideo} className="u-margin-bottom-medium">
+                        <p className="bigger-text u-margin-bottom-small white-text" style={{textAlign: "center"}}>Play video at playlist position</p>
+                        <div className="center-hrz">
+                            <input className="input--number" type="number" placeholder="position" ref={positionInput}/>
+                            <button type="submit" className="button normal-text">Go</button>
+                        </div>
+                    </form>
+
+                     <div className="center-hrz u-margin-bottom">
+                       <button className="button normal-text" onClick={stopSession}>Stop session</button> 
+                     </div>
+           </div>
+
+
         </div>
      );
 }

@@ -1,12 +1,10 @@
 @import "./abstracts/mixins";
 @import "./abstracts/variables";
 
-
 @import "./base/animations";
 @import "./base/base";
 @import "./base/typography";
 @import "./base/utilities";
-
 
 @import "./components/controls";
 @import "./components/video";
@@ -15,9 +13,12 @@
 @import "./components/features";
 @import "./components/middle";
 @import "./components/fileshare";
-@import "./components/fileshare";
 @import "./components/button";
-
+@import "./components/ytVideo";
+@import "./components/modal";
+@import "./components/form";
+@import "./components/input";
+@import "./components/ytControl";
 
 @import "./layout/center-vert";
 @import "./layout/center_hrz";

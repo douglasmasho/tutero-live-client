@@ -1,16 +1,14 @@
 import React, {useRef, useState, useEffect, useContext} from 'react';
-import io from "socket.io-client";
+
 import Video from "./Video";
 import Peer from "simple-peer";
 import Controls from "./Controls";
 import lottie from "lottie-web";
 import animLoading from "../animations/loading.json"
-import LiveChat from './LiveChat';
 import {socketContext} from "../Context/socketContext";
 import Icon from "./Icon";
 import Middle from './Middle';
 import Logo from "../assets/logo.svg";
-import YtShare from './YtShare';
 // const worker = new Worker("../worker.js");
 
 const Room = (props) => {
@@ -28,8 +26,6 @@ const Room = (props) => {
           videoPausedRef = useRef(),
           audioPausedRef = useRef(),
           [hasJoined, setHasJoined] = useState(false),
-          videoContainerRef = useRef(),
-          hamburgerRef = useRef(),
           [connectionMade, setConnectionMade] = useState(false),
           logoRef = useRef();
           
@@ -48,7 +44,7 @@ const Room = (props) => {
                 //send message to the other peer to mute their audio of you
                 socketRef.current.emit("mute audio", "");
                 break;
-           default: return
+           default: //do nothing
         }
         //this code causes a error, resort to stopping the video and audio manually on the other peer.
         // console.log(stream.getAudioTracks()[0]);
@@ -65,7 +61,7 @@ const Room = (props) => {
             case "audio":
                 socketRef.current.emit("unmute audio", "")
                 break;
-            default: return    
+            default: //do nothing   
                  
         }
 
@@ -132,6 +128,12 @@ const Room = (props) => {
                 peer.signal(data.signal);
                 //set signal as established 
                 setConnectionMade(true);
+                //send message to old user to tell them that the connection has established
+                socketRef.current.emit("connection established", "");
+            })
+
+            socketRef.current.on("connection established", data=>{
+                setConnectionMade(true);
             })
 
             socketRef.current.on("client disconnected", discID=>{
@@ -184,7 +186,7 @@ const Room = (props) => {
         const peer = new Peer({initiator:false, trickle:false, stream: stream});
         //set the RespPeer signal to the incoming signal
         peer.signal(signal);
-        setConnectionMade(true);
+        // setConnectionMade(true);///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //respond to caller when signal is ready
         peer.on("signal", signal=>{
             socketRef.current.emit("returning signal", {signal: signal, callerID: callerID});
@@ -245,6 +247,9 @@ const Room = (props) => {
             pausedStyle = {};
             controlsStyle = {};
             break;
+
+        default: 
+        //do nothing     
     }
 
      //prevent user from using controls if they havent joined

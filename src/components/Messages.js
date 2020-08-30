@@ -1,4 +1,4 @@
-import React, { useEffect, useRef ,Component} from 'react';
+import React, {Component} from 'react';
 import TrashIcon from "../assets/trash.svg";
 
 

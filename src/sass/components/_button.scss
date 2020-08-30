@@ -1,12 +1,10 @@
 .button{
     display: inline-block;
-    margin: 1rem 3rem;
+    // margin: 1rem 3rem;
     background-color: $green-light;
     padding: 1rem 2rem;
     text-decoration: none;
     color: $gray-dark;
-    transition: all .3s;
-    font-size: 1.4rem;
     border: none;
     border-radius: 100px;
     transition: all .5s;
@@ -25,6 +23,8 @@
 
      &__add{
          position: absolute;
+         width: 3rem;
+         height: 3rem;
          top: 50%;
          right: 0;
          border-radius: 50%;

@@ -55,6 +55,8 @@ const Controls = (props) => {
             case "unblur":
                 className = "video__unblurred" 
                 lastClassName = "video__blurred";
+                break;
+            default: //do nothing    
         }
         if(video.classList.contains(lastClassName)){
             video.classList.remove(lastClassName);

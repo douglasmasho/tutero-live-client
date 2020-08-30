@@ -29,6 +29,9 @@
     &,&--close{
         transition: all .5s;
     }
+    &--close{
+        cursor: pointer;
+    }
 
     &--notice{
         margin-left: 2rem;

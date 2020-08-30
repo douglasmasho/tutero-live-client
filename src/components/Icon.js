@@ -23,7 +23,10 @@ const Icon = (props) => {
             src = fileShare;
             break;
         case "liveChat":
-            src = liveChat;                
+            src = liveChat; 
+            break;
+            default:
+                ///wont execute.                
     }
 
     const showLogo = ()=>{

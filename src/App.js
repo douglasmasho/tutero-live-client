@@ -1,11 +1,9 @@
 import React from 'react';
-import {Route, Switch} from "react-router-dom";
+import {Route} from "react-router-dom";
 import CreateRoom from "./components/CreateRoom";
 import Room from "./components/Room";
 import "./sass/main.scss";
 import "./sass/styles.css";
-import Controls from "./components/Controls"
-import LiveChat from './components/LiveChat';
 import SocketContextProvider from './Context/socketContext';
 
 function App() {

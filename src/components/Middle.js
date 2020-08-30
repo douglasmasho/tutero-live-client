@@ -61,7 +61,6 @@ const Middle = (props) => {
         default:
                 currentComponent = null;
                 removeCurrentFeature();   
-                break; 
     }
 
     switch(props.mode){
@@ -74,21 +73,23 @@ const Middle = (props) => {
         case "feature":
             width = "70%";
             opacity = 1;
-            crossWidth = "4rem"
+            crossWidth = "3rem"
             content = currentComponent
-            break;    
+            break;   
+        default: 
+        ///do nothing     
     }
 
     let fileShare
     if(props.connectionMade && props.peers.length === 1){
         fileShare = <FileShare peer={props.peers[0]} connectionMade={props.connectionMade}/>
     }else{
-        fileShare = <h4 className="middle--notice">You can share files once a peer has connected</h4>
+        fileShare = <h5 className="middle--notice">You can share files once a peer has connected</h5>
     }
 
     let ytShare;
     if(props.connectionMade && props.peers.length === 1 && isytShareOn){
-        ytShare = <YtShare peer={props.peers[0]} connectionMade={props.connectionMade} setIsytShareOn={setIsytShareOn}/>
+        ytShare = <YtShare peer={props.peers[0]} connectionMade={props.connectionMade} setIsytShareOn={setIsytShareOn} />
     }else if(!isytShareOn){
           ytShare = (
               <div>

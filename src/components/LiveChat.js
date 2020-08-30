@@ -1,6 +1,5 @@
 import React, {useState, useRef, useEffect, useContext} from 'react';
 import lottie from "lottie-web";
-import animExpand from "../animations/expand.json";
 import animSend from "../animations/send.json";
 import  {socketContext} from "../Context/socketContext";
 import Messages from "./Messages";

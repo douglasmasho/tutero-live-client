@@ -85,8 +85,6 @@ const FileShare = (props) => {
             loop: true,
         });
         peer.on("data", handleIncomingData); ///the callback will automatically receive data argument
-
-
      }, []);
 
 
