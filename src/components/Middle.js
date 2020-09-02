@@ -4,11 +4,14 @@ import Cross from "../assets/cross.svg";
 import FileShare from "./FileShare";
 import YtShare from "./YtShare";
 import {socketContext} from "../Context/socketContext";
+
 const Middle = (props) => {
     const fileShareRef = useRef(),
-    ytShareRef = useRef(),
-    [isytShareOn, setIsytShareOn] = useState(true),
-    socketRef = useRef();
+          ytShareRef = useRef(),
+          [isytShareOn, setIsytShareOn] = useState(true),
+          socketRef = useRef();
+
+        //   console.log(props.otherUsers);
 
     socketRef.current = useContext(socketContext);
 
@@ -52,7 +55,6 @@ const Middle = (props) => {
                 //add the active class to this feature
                 fileShareRef.current.classList.add("features__visible");  
             break;
-        
         case "ytShare":
                  title = "YT Share";
                 removeCurrentFeature();
@@ -119,6 +121,7 @@ const Middle = (props) => {
             <div style={{display: "none"}} ref={ytShareRef}>
                 {ytShare}
             </div>
+
         </div>
      );
 }

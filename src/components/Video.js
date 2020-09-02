@@ -13,6 +13,12 @@ class Video extends Component {
             this.props.loadingRef.style.display = "none";
         })
     }
+
+    fullScreen(){
+        this.video.current.requestFullscreen().catch(e=>{
+            console.log(e);
+        })
+    }
     
     pausePlayVid(action){
         const video = this.video.current;

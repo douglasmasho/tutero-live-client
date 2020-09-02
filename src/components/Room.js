@@ -27,8 +27,14 @@ const Room = (props) => {
           audioPausedRef = useRef(),
           [hasJoined, setHasJoined] = useState(false),
           [connectionMade, setConnectionMade] = useState(false),
-          logoRef = useRef();
-          
+          [otherUsers, setOtherusers] = useState([]),
+          logoRef = useRef(),
+          testRef = useRef(),
+          videoStream = useRef(),
+          screenSharedRef = useRef(false),
+          [screenShared, setScreenShared] = useState(false);
+          screenSharedRef.current = screenShared;
+
 
     socketRef.current = useContext(socketContext);
 
@@ -79,6 +85,7 @@ const Room = (props) => {
         navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream=>{
             //put the stream in the ref
             //everything else is done here
+            videoStream.current = stream;
             videoRef.current.srcObject = stream;
             //send a request to join the current room.
             socketRef.current.emit("join room", roomID);
@@ -92,6 +99,7 @@ const Room = (props) => {
                  setHasJoined(true);
                 //create a peer for each user
                 const peers = [];
+                setOtherusers(otherUsers);
                 otherUsers.forEach(userID=>{
                     const peer = createPeer(userID, stream);
                     //add to the peersRef;
@@ -110,13 +118,14 @@ const Room = (props) => {
                 const {callerID, signal}  = data;
                 //create a response peer
                 const peer = createRespPeer(callerID, signal, stream);
+                peer.signal(signal);
                 //add to the peersRef;
                 peersRef.current.push({
                     peerID: callerID,
                     peer
                 })   
                 //add peer to peer state 
-                setPeers(peers=> [...peers, peer]);
+                setPeers([peer]);
             })
 
             socketRef.current.on("recipient returned signal", data=>{
@@ -185,14 +194,12 @@ const Room = (props) => {
         //create a non-initiator peer
         const peer = new Peer({initiator:false, trickle:false, stream: stream});
         //set the RespPeer signal to the incoming signal
-        peer.signal(signal);
         // setConnectionMade(true);///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //respond to caller when signal is ready
         peer.on("signal", signal=>{
             socketRef.current.emit("returning signal", {signal: signal, callerID: callerID});
         })
         // peer.on("data", handleReceivingData);
-
         return peer;
     }
 
@@ -205,6 +212,31 @@ const Room = (props) => {
         setMode("default");
         document.querySelector(".active").classList.remove("active")
     }
+
+    const stopShareScreen = ()=>{
+        if(screenSharedRef.current){
+            peersRef.current[0].peer.replaceTrack(peersRef.current[0].peer.streams[0].getVideoTracks()[0], videoStream.current.getVideoTracks()[0], peersRef.current[0].peer.streams[0]);
+            setScreenShared(false);
+            console.log(screenSharedRef)
+        }else{
+            console.log("i aint doin' shiz bucko")
+        }
+    }
+
+    const shareScreen = ()=>{
+         navigator.mediaDevices.getDisplayMedia().then(stream => {
+            const track = stream.getTracks()[0];
+            // peersRef.current[0].peer.streams[0].getVideoTracks()[0].stop();
+            peersRef.current[0].peer.replaceTrack(peersRef.current[0].peer.streams[0].getVideoTracks()[0], track,peersRef.current[0].peer.streams[0]);
+            setScreenShared(true);
+            track.onended = stopShareScreen;
+        });
+    } 
+
+    const fullScreen = ()=>{
+        otherVideo.current.fullScreen();
+    }
+
 
     let containerStyle, video1Style, video2Style, pausedStyle, controlsStyle;
     switch(mode){
@@ -269,15 +301,10 @@ const Room = (props) => {
     ///do he same thing for the middle div component
     let middle
     if(hasJoined){
-        middle =  <Middle currentFeature={currentFeature} defaultMode={initDefaultMode} mode={mode} peers={peers} connectionMade={connectionMade}/>
+        middle =  <Middle currentFeature={currentFeature} defaultMode={initDefaultMode} mode={mode} peers={peers} connectionMade={connectionMade} otherUsers={otherUsers}/>
     }else{
         middle = null
     }
-
-
-
-
-
 
     return ( 
         <div>
@@ -296,6 +323,11 @@ const Room = (props) => {
                             </div>
                             
                             <div  className="video-composition">
+                                 <button onClick={shareScreen}>Share screen</button>
+                                 <button onClick={stopShareScreen}> stop sharing</button>
+
+                                 <button onClick={fullScreen}>Enter full screen</button>
+
                                 <div className="video-pauseContainer"  style={pausedStyle}>
                                 <p className="video-videoPaused normal-text" ref={videoPausedRef}>Peer paused their video</p>
                                 <p className="video-audioPaused normal-text" ref={audioPausedRef}>Peer muted their audio</p>
@@ -310,8 +342,7 @@ const Room = (props) => {
                             </div>
                     </div>  
                 </div>
-
-               {/* {ytShare} */}
+                 
         </div>
 
      );

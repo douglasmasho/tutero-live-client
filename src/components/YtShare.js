@@ -76,6 +76,10 @@ const YtShare = (props) => {
        socket.on("peerIframeReady", data=>{
         setPeerIframeReady(true);
        })
+
+       return ()=>{
+           socket.off("peerIframeReady")
+       }
     }, [])
     
 

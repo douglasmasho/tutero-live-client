@@ -118,8 +118,9 @@ const Controls = (props) => {
                             <span className="row-4--child normal-text controls--label">on</span>
 
                         </div>
-
                     </div>      
+
+                    <button>Dummyy btn</button>
                 </div>
          )
 }
