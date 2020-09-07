@@ -35,12 +35,12 @@ const FileShare = (props) => {
             setGotFile(false);
             worker.postMessage("download");
 
-            worker.addEventListener("message", event=>{
-                //turn the blob back into a stream
-                const stream = event.data.stream();
-                const fileStream = streamSaver.createWriteStream(fileNameRef.current);
-                stream.pipeTo(fileStream);
-            })
+            // worker.addEventListener("message", event=>{
+            //     //turn the blob back into a stream
+            //     const stream = event.data.stream();
+            //     const fileStream = streamSaver.createWriteStream(fileNameRef.current);
+            //     stream.pipeTo(fileStream);
+            // })
 
         }
 
@@ -84,7 +84,14 @@ const FileShare = (props) => {
             animationData: animLoading,
             loop: true,
         });
-        peer.on("data", handleIncomingData); ///the callback will automatically receive data argument
+        peer.on("data", handleIncomingData); ///the callback will automatically receive data argument;
+        //put the event listener here
+        worker.addEventListener("message", event=>{
+            //turn the blob back into a stream
+            const stream = event.data.stream();
+            const fileStream = streamSaver.createWriteStream(fileNameRef.current);
+            stream.pipeTo(fileStream);
+        })
      }, []);
 
 
