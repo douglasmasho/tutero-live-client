@@ -217,9 +217,8 @@ const Room = (props) => {
         if(screenSharedRef.current){
             peersRef.current[0].peer.replaceTrack(peersRef.current[0].peer.streams[0].getVideoTracks()[0], videoStream.current.getVideoTracks()[0], peersRef.current[0].peer.streams[0]);
             setScreenShared(false);
-            console.log(screenSharedRef)
-        }else{
-            console.log("i aint doin' shiz bucko")
+            console.log(screenSharedRef);
+            videoRef.current.srcObject = videoStream.current;
         }
     }
 
@@ -230,6 +229,7 @@ const Room = (props) => {
             peersRef.current[0].peer.replaceTrack(peersRef.current[0].peer.streams[0].getVideoTracks()[0], track,peersRef.current[0].peer.streams[0]);
             setScreenShared(true);
             track.onended = stopShareScreen;
+            videoRef.current.srcObject = stream;
         });
     } 
 
@@ -238,7 +238,7 @@ const Room = (props) => {
     }
 
 
-    let containerStyle, video1Style, video2Style, pausedStyle, controlsStyle;
+    let containerStyle, video1Style, video2Style, pausedStyle, controlsStyle, controlsDisplay;
     switch(mode){
         case "feature":
             containerStyle = {
@@ -270,6 +270,9 @@ const Room = (props) => {
             };
             controlsStyle = {
                 marginRight: 0
+            };
+            controlsDisplay = {
+                display: "none"
             }
         break;
         case "default":
@@ -278,6 +281,7 @@ const Room = (props) => {
             video2Style = {};
             pausedStyle = {};
             controlsStyle = {};
+            controlsDisplay = {};
             break;
 
         default: 
@@ -288,7 +292,6 @@ const Room = (props) => {
     let icons;
      if(hasJoined){
         icons = <>
-                    <Icon feature={"screenShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
                     <Icon feature={"ytShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
                     <Icon feature={"liveCanvas"} featureMode={initFeatureMode} logo={logoRef.current}/>
                     <Icon feature={"fileShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
@@ -319,14 +322,16 @@ const Room = (props) => {
                         <div className="loading" ref={animContainerLoading}>
                         </div>
                             <div className="video-controls center-vert" ref={controlsRef} style={{display: "none"}}>
-                                <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current} styleObj={controlsStyle}/>
+                                <div style={controlsDisplay}>
+                                   <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current} styleObj={controlsStyle} fullScreen={fullScreen} screenShared={screenShared} shareScreen={shareScreen} stopShareScreen={stopShareScreen}/>
+                                </div>
                             </div>
                             
                             <div  className="video-composition">
-                                 <button onClick={shareScreen}>Share screen</button>
-                                 <button onClick={stopShareScreen}> stop sharing</button>
 
-                                 <button onClick={fullScreen}>Enter full screen</button>
+                                 {/* <button onClick={shareScreen}>Share screen</button>
+                                 <button onClick={stopShareScreen}> stop sharing</button>
+                                 <button onClick={fullScreen}>Enter full screen</button> */}
 
                                 <div className="video-pauseContainer"  style={pausedStyle}>
                                 <p className="video-videoPaused normal-text" ref={videoPausedRef}>Peer paused their video</p>

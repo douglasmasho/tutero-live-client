@@ -74,6 +74,9 @@ const FileShare = (props) => {
             }
 
             fileSentRef.current.style.display = "block";
+            setTimeout(()=>{
+                fileSentRef.current.style.display = "none";
+            }, 2000)
         }     
 
 
@@ -92,6 +95,10 @@ const FileShare = (props) => {
             const fileStream = streamSaver.createWriteStream(fileNameRef.current);
             stream.pipeTo(fileStream);
         })
+
+        // return ()=>{
+        //     worker.removeEventListener("message");
+        // }
      }, []);
 
 

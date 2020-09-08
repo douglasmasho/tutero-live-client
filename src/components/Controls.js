@@ -3,6 +3,8 @@ import Camcorder from "../assets/camera-video.svg";
 import Mic from "../assets/mic.svg";
 import lottie from "lottie-web";
 import animation from "../animations/toggleAnimated.json";
+import screenShare from "../assets/from xd/screenShare.svg";
+import RecordRTC from "recordrtc";
 
 const Controls = (props) => {
 
@@ -12,6 +14,13 @@ const Controls = (props) => {
     const animRef2 = useRef();
     const [vidState, setVidState] = useState("on");
     const [audState, setAudState] = useState("on");
+    const recorderRef = useRef();
+    const [isRecording, setIsRecording] = useState(false);
+    const isRecordingRef = useRef();
+    const myMicTrackRef = useRef();
+    const mic = useRef();
+    isRecordingRef.current = isRecording;
+
 
     useEffect(()=>{
         animRef.current = lottie.loadAnimation({
@@ -28,6 +37,67 @@ const Controls = (props) => {
         });
         animRef2.current.goToAndStop(0, true);
     }, []);
+
+    const startRecording = ()=>{
+
+        navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+            mic.current = stream;
+            myMicTrackRef.current = stream.getAudioTracks()[0];
+            navigator.mediaDevices.getDisplayMedia({ video: true,
+                audio: {
+                    autoGainControl: false,
+                    echoCancellation: false,
+                    googAutoGainControl: false,
+                    noiseSuppression: false,
+              }
+             }).then(async function(stream){
+                console.log(stream.getAudioTracks());
+
+                 stream.addTrack(myMicTrackRef.current);
+
+                 console.log(stream.getAudioTracks());
+                let recorder = RecordRTC(stream, {
+                    type: "video"
+                })
+    
+                const track = stream.getTracks()[0];
+    
+                recorderRef.current = recorder;
+                recorder.startRecording();
+                setIsRecording(true);
+    
+                track.onended = stopRecording;
+            })
+
+
+        })
+    }
+
+
+    const stopRecording = ()=>{
+        if(isRecordingRef.current){
+            const monthArr = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+            const date = new Date();
+            const timeStamp = date.valueOf();
+            const day = date.getDate();
+            const month = monthArr[date.getMonth()];
+            const year = date.getFullYear();
+            // const fileName = `${day}-${month}-${year}-${timeStamp}.x-matroska;codecs=avc1,opus`;
+            const fileName = `${day}-${month}-${year}-${timeStamp}.webm`;
+            console.log(fileName);
+            setIsRecording(false);
+            recorderRef.current.stopRecording(function() {
+                let blob = recorderRef.current.getBlob();
+                RecordRTC.invokeSaveAsDialog(blob, fileName);
+            });
+            // console.log(recorderRef.current);
+        }else{
+            console.log("i aint doing shiz bucko")
+        }
+    }
+
+
+
     const getColorVid = ()=>{
         if(vidState === "on"){
             return "#2ffb52"
@@ -66,7 +136,30 @@ const Controls = (props) => {
         }
     }
 
+    let screenShareBtn;
+    if(props.screenShared){
+        screenShareBtn =  <button className="button normal-text" onClick={props.stopShareScreen}>Stop sharing</button>
+    }else{
+        screenShareBtn =  <button className="button normal-text" onClick={props.shareScreen} >Share screen</button>
 
+    }
+
+    let screenRecordIcon, divBackground, textColor, divText, recorderFunc;
+    if(isRecordingRef.current){
+        screenRecordIcon = <ion-icon name="stop"></ion-icon>;
+        divBackground = "#ff0000";
+        textColor = "#ffffff";
+        divText = "Stop";
+        recorderFunc = stopRecording;
+    }else{
+        screenRecordIcon = (<div style={{color: "red"}}>
+                              <ion-icon name="ellipse"></ion-icon>
+                            </div>)  
+        divBackground = "#2ffb52";
+        textColor = "#000000";
+        divText = "Record";
+        recorderFunc = startRecording;
+    }
 
     return(
                 <div>
@@ -118,9 +211,25 @@ const Controls = (props) => {
                             <span className="row-4--child normal-text controls--label">on</span>
 
                         </div>
-                    </div>      
+                    </div>
 
-                    <button>Dummyy btn</button>
+                    <div className="screenshare">
+                        <img src={screenShare} alt=""/>
+                        <div className="screenshare--expanded center-vert">
+                            {screenShareBtn}
+                        </div>
+                    </div>     
+
+                    <div className="fullscreen" onClick={props.fullScreen}>
+                       <ion-icon name="expand-outline"></ion-icon>
+                       <div className="fullscreen--expanded"><p className="black-text u-margin-left">Fullscreen</p></div>
+                    </div> 
+
+                    <div className="record" onClick={recorderFunc} style={{backgroundColor: divBackground,color: textColor}}>
+                            {screenRecordIcon}
+                        <div className="record--expanded center-vert"><p className="u-margin-left">{divText}</p></div>
+                    </div>
+
                 </div>
          )
 }
