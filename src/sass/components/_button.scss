@@ -17,10 +17,6 @@
         color: $gray-dark !important;
      }
 
-     &__golive{
-         @include center;
-     }
-
      &__add{
          position: absolute;
          width: 3rem;

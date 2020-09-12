@@ -4,12 +4,14 @@ import Cross from "../assets/cross.svg";
 import FileShare from "./FileShare";
 import YtShare from "./YtShare";
 import {socketContext} from "../Context/socketContext";
+import SimpleBar from 'simplebar-react';
 
 const Middle = (props) => {
     const fileShareRef = useRef(),
           ytShareRef = useRef(),
           [isytShareOn, setIsytShareOn] = useState(true),
-          socketRef = useRef();
+          socketRef = useRef(),
+          middleRef = useRef();
 
         //   console.log(props.otherUsers);
 
@@ -44,7 +46,7 @@ const Middle = (props) => {
                 removeCurrentFeature();
             break;
         case "liveChat":
-                currentComponent = <LiveChat/>;
+                currentComponent = <LiveChat middleDiv={middleRef.current}/>;
                 title = "Live Chat";
                 removeCurrentFeature();
             break;
@@ -105,7 +107,7 @@ const Middle = (props) => {
     }
     
     return ( 
-        <div style={{width, opacity}} className="middle">
+        <div style={{width, opacity}} className="middle" ref={middleRef}>
             <div className="middle--header">
                     <h3 className={"features--header"}>{title}</h3>
                     

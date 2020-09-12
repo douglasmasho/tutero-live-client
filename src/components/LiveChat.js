@@ -28,6 +28,7 @@ const LiveChat = (props) => {
          function autoResize() { 
          this.style.height = 'auto'; 
          this.style.height = this.scrollHeight + 'px'; 
+         props.middleDiv.scrollTo(0, props.middleDiv.scrollHeight);
       } 
 
         //get the messages array from the server after the Room component has put you into the room

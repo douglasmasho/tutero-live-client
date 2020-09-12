@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import TrashIcon from "../assets/trash.svg";
+import SimpleBar from 'simplebar-react';
+import 'simplebar/dist/simplebar.css';
 
 
 class Messages extends Component {

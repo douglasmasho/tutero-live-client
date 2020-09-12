@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect, useContext} from 'react';
+import React, {useRef, useState, useEffect, useContext, useCallback} from 'react';
 
 import Video from "./Video";
 import Peer from "simple-peer";
@@ -9,6 +9,7 @@ import {socketContext} from "../Context/socketContext";
 import Icon from "./Icon";
 import Middle from './Middle';
 import Logo from "../assets/logo.svg";
+import Test from "./Test"
 // const worker = new Worker("../worker.js");
 
 const Room = (props) => {
@@ -32,13 +33,14 @@ const Room = (props) => {
           testRef = useRef(),
           videoStream = useRef(),
           screenSharedRef = useRef(false),
+          queryNoticeRef = useRef(),
           [screenShared, setScreenShared] = useState(false);
           screenSharedRef.current = screenShared;
 
 
     socketRef.current = useContext(socketContext);
 
-    const pauseTrack =(track)=>{
+    const pauseTrack = useCallback((track)=>{
         switch(track){
             case "video":
                 //pause your video;
@@ -55,9 +57,10 @@ const Room = (props) => {
         //this code causes a error, resort to stopping the video and audio manually on the other peer.
         // console.log(stream.getAudioTracks()[0]);
         // peers[0].removeTrack(stream.getAudioTracks()[0], stream);
-    }
+    },[])
 
-    const resumeTrack=(track)=>{
+
+    const resumeTrack= useCallback((track)=>{
         switch(track){
             case "video":
                 //resume your video
@@ -70,11 +73,29 @@ const Room = (props) => {
             default: //do nothing   
                  
         }
-
-
-    }
+    },[])
 
     useEffect(()=>{
+        const x = window.matchMedia("(max-width: 900px)");
+
+        //query function 
+        let showQueryNotice = (x)=>{
+            if(!x.matches){
+                console.log("do not show notice");
+                queryNoticeRef.current.style.display = "none"
+            }else{
+                console.log("show notice");
+                queryNoticeRef.current.style.display = "block"
+
+            }
+        }
+
+       showQueryNotice(x);
+        x.addListener(showQueryNotice);
+
+
+
+
         animRefLoading.current = lottie.loadAnimation({
             container: animContainerLoading.current,
             animationData: animLoading,
@@ -152,6 +173,7 @@ const Room = (props) => {
                 // //remove the peer from the array in state.
                 setPeers(peers=> (peers.filter(p=>(p !== discPeer)) ) )
                 discPeer.destroy();
+                window.location.reload();
             })
 
             socketRef.current.on("hello world", data=>{
@@ -177,6 +199,8 @@ const Room = (props) => {
             })
 
         })
+
+
     },[]);
     const createPeer = (recipient, stream)=>{
         //create a peer
@@ -213,32 +237,31 @@ const Room = (props) => {
         document.querySelector(".active").classList.remove("active")
     }
 
-    const stopShareScreen = ()=>{
+    const stopShareScreen = useCallback(()=>{
         if(screenSharedRef.current){
             peersRef.current[0].peer.replaceTrack(peersRef.current[0].peer.streams[0].getVideoTracks()[0], videoStream.current.getVideoTracks()[0], peersRef.current[0].peer.streams[0]);
             setScreenShared(false);
             console.log(screenSharedRef);
             videoRef.current.srcObject = videoStream.current;
         }
-    }
+    },[screenSharedRef.current, videoStream.current])
 
-    const shareScreen = ()=>{
-         navigator.mediaDevices.getDisplayMedia().then(stream => {
-            const track = stream.getTracks()[0];
-            // peersRef.current[0].peer.streams[0].getVideoTracks()[0].stop();
-            peersRef.current[0].peer.replaceTrack(peersRef.current[0].peer.streams[0].getVideoTracks()[0], track,peersRef.current[0].peer.streams[0]);
-            setScreenShared(true);
-            track.onended = stopShareScreen;
-            videoRef.current.srcObject = stream;
-        });
-    } 
+    const shareScreen = useCallback(()=>{
+        navigator.mediaDevices.getDisplayMedia().then(stream => {
+           const track = stream.getTracks()[0];
+           // peersRef.current[0].peer.streams[0].getVideoTracks()[0].stop();
+           peersRef.current[0].peer.replaceTrack(peersRef.current[0].peer.streams[0].getVideoTracks()[0], track,peersRef.current[0].peer.streams[0]);
+           setScreenShared(true);
+           track.onended = stopShareScreen;
+           videoRef.current.srcObject = stream;
+       });
+   } ,[peersRef.current])
 
-    const fullScreen = ()=>{
+    const fullScreen = useCallback(()=>{
         otherVideo.current.fullScreen();
-    }
+    },[])
 
-
-    let containerStyle, video1Style, video2Style, pausedStyle, controlsStyle, controlsDisplay;
+    let containerStyle, video2Style, pausedStyle, controlsDisplay;
     switch(mode){
         case "feature":
             containerStyle = {
@@ -246,14 +269,7 @@ const Room = (props) => {
                 display: "flex",
                 flexDirection: "column"
             };
-            video1Style = {
-                width: "100%",
-                height: "unset",
-                position: "relative",
-                borderRadius: 0,
-                borderBottomLeftRadius: "20px",
-                borderBottomRightRadius: "20px"
-            };
+
             video2Style = {
                 position: "relative",
                 bottom: "unset",
@@ -268,22 +284,16 @@ const Room = (props) => {
                 left: "unset",
                 top: "unset",
             };
-            controlsStyle = {
-                marginRight: 0
-            };
             controlsDisplay = {
                 display: "none"
             }
         break;
         case "default":
-            containerStyle = {};
-            video1Style = {};
+
             video2Style = {};
             pausedStyle = {};
-            controlsStyle = {};
             controlsDisplay = {};
             break;
-
         default: 
         //do nothing     
     }
@@ -293,7 +303,7 @@ const Room = (props) => {
      if(hasJoined){
         icons = <>
                     <Icon feature={"ytShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
-                    <Icon feature={"liveCanvas"} featureMode={initFeatureMode} logo={logoRef.current}/>
+                    {/* <Icon feature={"liveCanvas"} featureMode={initFeatureMode} logo={logoRef.current}/> */}
                     <Icon feature={"fileShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
                     <Icon feature={"liveChat"} featureMode={initFeatureMode} logo={logoRef.current}/>
                </>
@@ -311,7 +321,9 @@ const Room = (props) => {
 
     return ( 
         <div>
-
+            <div className="querynotice" ref={queryNoticeRef}>
+                <h3>Please use desktop mode</h3>
+            </div>
                 <div className="row" style={{justifyContent: "space-between", height: "100%", padding: 0}}>
                     <div className="features--tab">
                         <img src={Logo} alt="logo" className="features--logo" ref={logoRef}/>
@@ -323,15 +335,11 @@ const Room = (props) => {
                         </div>
                             <div className="video-controls center-vert" ref={controlsRef} style={{display: "none"}}>
                                 <div style={controlsDisplay}>
-                                   <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current} styleObj={controlsStyle} fullScreen={fullScreen} screenShared={screenShared} shareScreen={shareScreen} stopShareScreen={stopShareScreen}/>
+                                   <Controls pauseTrack={pauseTrack} resumeTrack={resumeTrack} video={videoRef.current}  fullScreen={fullScreen} screenShared={screenShared} shareScreen={shareScreen} stopShareScreen={stopShareScreen}/>
                                 </div>
                             </div>
                             
                             <div  className="video-composition">
-
-                                 {/* <button onClick={shareScreen}>Share screen</button>
-                                 <button onClick={stopShareScreen}> stop sharing</button>
-                                 <button onClick={fullScreen}>Enter full screen</button> */}
 
                                 <div className="video-pauseContainer"  style={pausedStyle}>
                                 <p className="video-videoPaused normal-text" ref={videoPausedRef}>Peer paused their video</p>
@@ -341,13 +349,13 @@ const Room = (props) => {
                                 <video muted autoPlay playsInline ref={videoRef} className="video-composition--2" style={video2Style}></video>
                                 {
                                     peers.map((peer, index)=>{
-                                        return <Video key={index} peer={peer} ref={otherVideo} videoControls={controlsRef.current} loadingRef={animContainerLoading.current} videoPausedRef={videoPausedRef.current} audioPausedRef={audioPausedRef.current} styleObj={video1Style}/>
+                                        return <Video key={index} peer={peer} ref={otherVideo} videoControls={controlsRef.current} loadingRef={animContainerLoading.current} videoPausedRef={videoPausedRef.current} audioPausedRef={audioPausedRef.current}  mode={mode}/>
                                     })
                                 }
                             </div>
                     </div>  
                 </div>
-                 
+              
         </div>
 
      );

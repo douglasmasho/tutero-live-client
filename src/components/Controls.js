@@ -21,6 +21,9 @@ const Controls = (props) => {
     const mic = useRef();
     isRecordingRef.current = isRecording;
 
+    useEffect(()=>{
+        console.log("i rendered")
+    })
 
     useEffect(()=>{
         animRef.current = lottie.loadAnimation({
@@ -163,7 +166,7 @@ const Controls = (props) => {
 
     return(
                 <div>
-                    <div className="controls controls__1" style={{backgroundColor: getColorVid(), ...props.styleObj}}>
+                    <div className="controls controls__1" style={{backgroundColor: getColorVid(), marginRight: 0}}>
                             <span className="controls--icon"><img src={Camcorder} alt="" className="controls__icon" style={{width: "30px"}}/></span>
                             <div className="row controls--expanded center-vert--row">
                             <span className="row-4--child normal-text controls--label">off</span>
@@ -234,4 +237,4 @@ const Controls = (props) => {
          )
 }
  
-export default Controls;
+export default React.memo(Controls);

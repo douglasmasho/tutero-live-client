@@ -1,10 +1,11 @@
-import React, {Component} from 'react';
+import React, {Component, PureComponent} from 'react';
 
 
-class Video extends Component {
+class Video extends PureComponent {
 
     peer = this.props.peer;
     video = React.createRef();
+    styleObj = React.createRef();
 
     componentDidMount(){
         this.peer.on("stream", stream=>{
@@ -12,6 +13,8 @@ class Video extends Component {
             this.props.videoControls.style.display = "flex";
             this.props.loadingRef.style.display = "none";
         })
+
+        console.log("I MOUNTED")
     }
 
     fullScreen(){
@@ -131,9 +134,22 @@ class Video extends Component {
 
 
 
+
     render() { 
+        if(this.props.mode === "feature"){
+            this.styleObj.current = {
+                width: "100%",
+                height: "unset",
+                position: "relative",
+                borderRadius: 0,
+                borderBottomLeftRadius: "20px",
+                borderBottomRightRadius: "20px"
+            }
+        }else if(this.props.mode === "default"){
+            this.styleObj.current = {}
+        }
         return ( 
-            <video style={this.props.styleObj} className="video-composition--1" ref={this.video} playsInline autoPlay></video>
+            <video style={this.styleObj.current} className="video-composition--1" ref={this.video} playsInline autoPlay></video>
          );
     }
 }
