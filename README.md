@@ -8,12 +8,14 @@ A Video chat web app for online tutorials and pair study sessions. This app come
 ## Important
 this is the client-side, the server side of the application is needed to run this. The server side code can be found [here](https://github.com/douglasmasho/tutero-live-server)
 
+This project works best on Google chrome or any chromium based browser (Microsoft Edge). Tutero Live does not work on mobile devices.
+
+For the YTshare feature, make sure to use the green controls under the video player, so that you and your peer's videos are in sync.
+
 
 ## Technologies used
 React, WebRTC, simple-peer, socket.io, node.js, express, youtube data api, youtube iFrame api, recordRTC, streamsaver.
 
-## Notable:
-This project works best on Google chrome or any chromium based browser (Microsoft Edge). Tutero Live does not work on mobile devices.
 
 ## [Live Demo](https://tuterolive.herokuapp.com/)
 
