@@ -313,6 +313,7 @@ const Room = (props) => {
 
     ///do he same thing for the middle div component
     let middle
+    
     if(hasJoined){
         middle =  <Middle currentFeature={currentFeature} defaultMode={initDefaultMode} mode={mode} peers={peers} connectionMade={connectionMade} otherUsers={otherUsers}/>
     }else{
