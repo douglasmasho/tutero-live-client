@@ -5,13 +5,15 @@ import FileShare from "./FileShare";
 import YtShare from "./YtShare";
 import {socketContext} from "../Context/socketContext";
 import SimpleBar from 'simplebar-react';
+import LiveCanvas from './LiveCanvas';
 
 const Middle = (props) => {
     const fileShareRef = useRef(),
           ytShareRef = useRef(),
           [isytShareOn, setIsytShareOn] = useState(true),
           socketRef = useRef(),
-          middleRef = useRef();
+          middleRef = useRef(),
+          liveCanvasRef = useRef();
 
         //   console.log(props.otherUsers);
 
@@ -62,6 +64,11 @@ const Middle = (props) => {
                 removeCurrentFeature();
                 ytShareRef.current.classList.add("features__visible");  
              break;
+         case "liveCanvas":
+                title = "Live Canvas";
+               removeCurrentFeature();
+               liveCanvasRef.current.classList.add("features__visible");  
+            break;
         default:
                 currentComponent = null;
                 removeCurrentFeature();   
@@ -122,6 +129,10 @@ const Middle = (props) => {
 
             <div style={{display: "none"}} ref={ytShareRef}>
                 {ytShare}
+            </div>
+
+            <div style={{display: "none"}} ref={liveCanvasRef}>
+                <LiveCanvas/>
             </div>
 
         </div>
