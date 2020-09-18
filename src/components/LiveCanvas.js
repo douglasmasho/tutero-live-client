@@ -2,19 +2,17 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import  {socketContext} from "../Context/socketContext";
 
 
-const LivCanvas = (props) => {
+const LiveCanvas = (props) => {
     const socket = useContext(socketContext),
     canvasRef = useRef(),
     ctx = useRef(),
     scrollFromPeer = useRef(),
     containerRef = useRef(),
+    
     toolRef = useRef(),
     colorRef = useRef(),
     paintingRef = useRef();
     scrollFromPeer.current = false;
-    // toolRef.current = tool;
-    // let painting = false;
-    // let tool = "draw";
     toolRef.current = "draw";
     paintingRef.current = false
     // let colorRef = useRef();
@@ -22,11 +20,14 @@ const LivCanvas = (props) => {
 
     useEffect(()=>{
         ctx.current = canvasRef.current.getContext("2d");
-        canvasRef.current.height = window.innerHeight * 2;
-        canvasRef.current.width = window.innerWidth * 2;
-        canvasRef.current.style.width = `${window.innerWidth}px`;
-        canvasRef.current.style.height = `${window.innerHeight}px`;
-        ctx.current.scale(2,2);
+        canvasRef.current.width = 3000;
+        canvasRef.current.height = 2000;
+
+        // canvasRef.current.height = window.innerHeight * 2;
+        // canvasRef.current.width = window.innerWidth * 2;
+        // canvasRef.current.style.width = `${window.innerWidth}px`;
+        // canvasRef.current.style.height = `${window.innerHeight}px`;
+        // ctx.current.scale(2,2);
 
         document.querySelectorAll(".colors").forEach(el=>{
             el.addEventListener("click", (e)=>{
@@ -196,4 +197,4 @@ const LivCanvas = (props) => {
      );
 }
  
-export default React.memo(LivCanvas);
+export default React.memo(LiveCanvas);
