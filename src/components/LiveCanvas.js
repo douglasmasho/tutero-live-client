@@ -1,5 +1,10 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import  {socketContext} from "../Context/socketContext";
+import Pencil from"../assets//from xd/pencil.svg";
+import Eraser from"../assets//from xd/Group 117.svg";
+import Trash from"../assets//trash.svg";
+
+
 
 
 const LiveCanvas = (props) => {
@@ -23,17 +28,14 @@ const LiveCanvas = (props) => {
         canvasRef.current.width = 3000;
         canvasRef.current.height = 2000;
 
-        // canvasRef.current.height = window.innerHeight * 2;
-        // canvasRef.current.width = window.innerWidth * 2;
-        // canvasRef.current.style.width = `${window.innerWidth}px`;
-        // canvasRef.current.style.height = `${window.innerHeight}px`;
-        // ctx.current.scale(2,2);
-
         document.querySelectorAll(".colors").forEach(el=>{
             el.addEventListener("click", (e)=>{
                 colorRef.current = e.currentTarget.style.backgroundColor;
-                console.log(colorRef.current)
-                // console.log(e.currentTarget.style.backgroundColor);
+                console.log(colorRef.current);
+                if(document.querySelector(".colors-active")){
+                    document.querySelector(".colors-active").classList.remove("colors-active") 
+                }
+                el.classList.add("colors-active")
             })
         })
 
@@ -55,11 +57,27 @@ const LiveCanvas = (props) => {
             // setTool("erase")
             // toolRef.current = "erase";
             // console.log("peer is erasing");
+            addActiveClass(document.getElementById("erase"));
+            // console.log(document.getElementById("erase"));
+            document.querySelectorAll(".colors").forEach(el=>{
+                if(el.classList.contains("colors-visible")){
+                    el.classList.remove("colors-visible");
+                }
+                el.classList.add("colors-gone");
+            })
             toolRef.current = "erase";
         })
 
         socket.on("unerase", ()=>{
-            toolRef.current = "draw"
+            addActiveClass(document.getElementById("draw"));
+            // console.log(document.getElementById("draw"));
+            document.querySelectorAll(".colors").forEach(el=>{
+                if(el.classList.contains("colors-gone")){
+                    el.classList.remove("colors-gone");
+                }
+                el.classList.add("colors-visible");
+            })
+            toolRef.current = "draw";
         }) 
 
         socket.on("clear", ()=>{
@@ -115,7 +133,7 @@ const LiveCanvas = (props) => {
                     ctx.current.strokeStyle = colorRef.current;
                 }
                 draw(x,y);
-                ctx.current.lineWidth = 6;
+                ctx.current.lineWidth = 3;
              break;
              default: //do nothing   
 
@@ -162,6 +180,14 @@ const LiveCanvas = (props) => {
     }
 }
 
+const addActiveClass = (el)=>{
+   ///remove any class of LS-active if it exists
+   if(document.querySelector(".LC-active")){
+    document.querySelector(".LC-active").classList.remove("LC-active");
+   }
+   el.classList.add("LC-active");
+}
+
 
 
 
@@ -175,21 +201,37 @@ const LiveCanvas = (props) => {
                     socket.emit("scroll", {x: e.currentTarget.scrollLeft, y: e.currentTarget.scrollTop})
            }}>
              <canvas id="canvas" style={{backgroundColor: "white"}} ref={canvasRef} onMouseDown={drawFunc} onMouseUp={drawFunc} onMouseMove={drawFunc}></canvas>
+             
            </div>
 
 
             <div className="liveCanvas--controls">
-                <button id="draw" onClick={()=>{
+                <button id="draw"  className="controls__draw LC-active"onClick={(e)=>{
                     changeTool("draw");
-                }}>Draw</button>
-                <button id="erase" onClick={()=>{
-                    changeTool("erase")
-                }}>Erase</button>
-                <button id="clear" onClick={clear}>Clear canvas</button>
-                <button className="colors" style={{backgroundColor: "black", color: "white"}}>Black</button>
-                <button className="colors"   style={{backgroundColor: "red", color: "white"}}>Red</button>
-                <button className="colors"   style={{backgroundColor: "blue", color: "white"}}>Blue</button>
-                <button className="colors"   style={{backgroundColor: "yellow", color: "black"}}>yellow</button>
+                    addActiveClass(e.currentTarget);
+                    document.querySelectorAll(".colors").forEach(el=>{
+                        if(el.classList.contains("colors-gone")){
+                            el.classList.remove("colors-gone");
+                        }
+                        el.classList.add("colors-visible");
+                    })
+                }}><img src={Pencil} alt=""/></button>
+                <button id="erase" className="controls__erase" onClick={(e)=>{
+                    changeTool("erase");
+                    addActiveClass(e.currentTarget);
+                    document.querySelectorAll(".colors").forEach(el=>{
+                        if(el.classList.contains("colors-visible")){
+                            el.classList.remove("colors-visible");
+                        }
+                        el.classList.add("colors-gone");
+                    })
+
+                }}><img src={Eraser} alt=""/></button>
+                <button id="clear" onClick={clear}><img src={Trash} alt=""/></button>
+                <button className="colors" style={{backgroundColor: "black", color: "white"}}></button>
+                <button className="colors"   style={{backgroundColor: "red", color: "white"}}></button>
+                <button className="colors"   style={{backgroundColor: "blue", color: "white"}}></button>
+                <button className="colors"   style={{backgroundColor: "yellow", color: "black"}}></button>
             </div>
 
 

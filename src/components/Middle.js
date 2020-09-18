@@ -38,7 +38,8 @@ const Middle = (props) => {
        })
     }, [])
 
-    let width, opacity ,content, crossWidth, title;
+    let width, opacity ,content, crossWidth, title, height;
+    height = "unset";
     //content will be dependent on the current feature
     let currentComponent;
     switch(props.currentFeature){ ///////////read currentFeature to determine what must be displayed in  the middleDiv
@@ -67,7 +68,8 @@ const Middle = (props) => {
          case "liveCanvas":
                 title = "Live Canvas";
                removeCurrentFeature();
-               liveCanvasRef.current.classList.add("features__visible");  
+               liveCanvasRef.current.classList.add("features__visible"); 
+               height = "100%"; 
             break;
         default:
                 currentComponent = null;
@@ -114,7 +116,7 @@ const Middle = (props) => {
     }
     
     return ( 
-        <div style={{width, opacity}} className="middle" ref={middleRef}>
+        <div style={{width, opacity, height}} className="middle" ref={middleRef}>
             <div className="middle--header">
                     <h3 className={"features--header"}>{title}</h3>
                     
