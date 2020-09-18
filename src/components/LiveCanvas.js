@@ -137,8 +137,8 @@ const LivCanvas = (props) => {
 
    const drawFunc = (e)=>{
     // console.log(e)
-    const x = e.clientX + containerRef.current.scrollLeft - document.querySelector("#canvas").getBoundingClientRect().x;
-    const y = e.clientY + containerRef.current.scrollTop - document.querySelector("#canvas").getBoundingClientRect().y;
+    const x = e.clientX - document.querySelector("#canvas").getBoundingClientRect().x;
+    const y = e.clientY - document.querySelector("#canvas").getBoundingClientRect().y;
     let type;
     switch(e.type){
         case "mousedown": type = "start";
