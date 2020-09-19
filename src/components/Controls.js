@@ -94,8 +94,6 @@ const Controls = (props) => {
                 RecordRTC.invokeSaveAsDialog(blob, fileName);
             });
             // console.log(recorderRef.current);
-        }else{
-            console.log("i aint doing shiz bucko")
         }
     }
 
