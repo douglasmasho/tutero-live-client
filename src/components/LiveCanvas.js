@@ -1,9 +1,11 @@
+import 'rc-color-picker/assets/index.css';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import  {socketContext} from "../Context/socketContext";
 import Pencil from"../assets//from xd/pencil.svg";
 import Eraser from"../assets//from xd/Group 117.svg";
 import Trash from"../assets//trash.svg";
-
+import Customize from "../assets/customize.svg";
+import ColorPicker from 'rc-color-picker';
 
 
 
@@ -12,16 +14,20 @@ const LiveCanvas = (props) => {
     canvasRef = useRef(),
     ctx = useRef(),
     scrollFromPeer = useRef(),
-    containerRef = useRef(),
-    
+    containerRef = useRef(),   
     toolRef = useRef(),
+    [customColor, setCustomColor] = useState(),
     colorRef = useRef(),
-    paintingRef = useRef();
+    customEl = useRef(),
+    paintingRef = useRef(),
+    lcControls = useRef(),
+    openTools = useRef(),
+    customColorRef = useRef();
     scrollFromPeer.current = false;
     toolRef.current = "draw";
-    paintingRef.current = false
-    // let colorRef = useRef();
+    paintingRef.current = false;
     colorRef.current = "black";
+    customColorRef.current = customColor;
 
     useEffect(()=>{
         ctx.current = canvasRef.current.getContext("2d");
@@ -188,6 +194,19 @@ const addActiveClass = (el)=>{
    el.classList.add("LC-active");
 }
 
+const changeHandler = (colors)=> {
+    setCustomColor(colors.color);
+    customEl.current.click()
+}
+
+// const closeTools = ()=>{
+//     document.querySelectorAll(".tools").forEach(el=>{
+//         el.style.scale = "0";
+//         el.style.width = "0";
+
+//         // console.log(el)
+//     })
+// }
 
 
 
@@ -203,10 +222,9 @@ const addActiveClass = (el)=>{
              <canvas id="canvas" style={{backgroundColor: "white"}} ref={canvasRef} onMouseDown={drawFunc} onMouseUp={drawFunc} onMouseMove={drawFunc}></canvas>
              
            </div>
-
-
-            <div className="liveCanvas--controls">
-                <button id="draw"  className="controls__draw LC-active"onClick={(e)=>{
+           
+            <div className="liveCanvas--controls" ref={lcControls}>
+                <button id="draw"  className="controls__draw LC-active tools"onClick={(e)=>{
                     changeTool("draw");
                     addActiveClass(e.currentTarget);
                     document.querySelectorAll(".colors").forEach(el=>{
@@ -216,7 +234,7 @@ const addActiveClass = (el)=>{
                         el.classList.add("colors-visible");
                     })
                 }}><img src={Pencil} alt=""/></button>
-                <button id="erase" className="controls__erase" onClick={(e)=>{
+                <button id="erase" className="controls__erase tools" onClick={(e)=>{
                     changeTool("erase");
                     addActiveClass(e.currentTarget);
                     document.querySelectorAll(".colors").forEach(el=>{
@@ -227,13 +245,18 @@ const addActiveClass = (el)=>{
                     })
 
                 }}><img src={Eraser} alt=""/></button>
-                <button id="clear" onClick={clear}><img src={Trash} alt=""/></button>
-                <button className="colors" style={{backgroundColor: "black", color: "white"}}></button>
-                <button className="colors"   style={{backgroundColor: "red", color: "white"}}></button>
-                <button className="colors"   style={{backgroundColor: "blue", color: "white"}}></button>
-                <button className="colors"   style={{backgroundColor: "yellow", color: "black"}}></button>
+                <button id="clear" onClick={clear} className="tools"><img src={Trash} alt=""/></button>
+                <button style={{backgroundColor: "white", position: "relative"}} className="tools"><img src={Customize} alt=""/><ColorPicker
+                
+                   animation="slide-up"
+                   color={'#36c'}
+                   onChange={changeHandler}
+                 /></button>
+                <button className="colors tools" style={{backgroundColor: customColorRef.current}} ref={customEl}></button>
+                <button className="colors tools" style={{backgroundColor: "black"}}></button>
+                <button className="colors tools" style={{backgroundColor: "red"}}></button>
+                <button className="colors tools" style={{backgroundColor: "blue"}}></button>
             </div>
-
 
         </div>
      );
