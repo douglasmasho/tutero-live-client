@@ -1,11 +1,14 @@
 import 'rc-color-picker/assets/index.css';
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { saveAs } from 'file-saver';
 import  {socketContext} from "../Context/socketContext";
 import Pencil from"../assets//from xd/pencil.svg";
 import Eraser from"../assets//from xd/Group 117.svg";
 import Trash from"../assets//trash.svg";
 import Customize from "../assets/customize.svg";
+import Download from "../assets/download.svg";
 import ColorPicker from 'rc-color-picker';
+
 
 
 
@@ -22,6 +25,7 @@ const LiveCanvas = (props) => {
     paintingRef = useRef(),
     lcControls = useRef(),
     openTools = useRef(),
+    customizeBtn = useRef(),
     customColorRef = useRef();
     scrollFromPeer.current = false;
     toolRef.current = "draw";
@@ -65,6 +69,7 @@ const LiveCanvas = (props) => {
             // console.log("peer is erasing");
             addActiveClass(document.getElementById("erase"));
             // console.log(document.getElementById("erase"));
+            customizeBtn.current.style.scale = "0";
             document.querySelectorAll(".colors").forEach(el=>{
                 if(el.classList.contains("colors-visible")){
                     el.classList.remove("colors-visible");
@@ -77,6 +82,7 @@ const LiveCanvas = (props) => {
         socket.on("unerase", ()=>{
             addActiveClass(document.getElementById("draw"));
             // console.log(document.getElementById("draw"));
+            customizeBtn.current.style.scale = "1";
             document.querySelectorAll(".colors").forEach(el=>{
                 if(el.classList.contains("colors-gone")){
                     el.classList.remove("colors-gone");
@@ -196,7 +202,24 @@ const addActiveClass = (el)=>{
 
 const changeHandler = (colors)=> {
     setCustomColor(colors.color);
-    customEl.current.click()
+    if(toolRef.current === "draw"){
+        customEl.current.click();
+    }
+}
+
+const download = ()=>{
+    const monthArr = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    const date = new Date();
+    const timeStamp = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    const day = date.getDate();
+    const month = monthArr[date.getMonth()];
+    const year = date.getFullYear();
+    // const fileName = `${day}-${month}-${year}-${timeStamp}.x-matroska;codecs=avc1,opus`;
+    const fileName = `canvas-${day}-${month}-${year}-${timeStamp}.png`;
+    // console.log(fileName);
+    canvasRef.current.toBlob(blob=>{
+        saveAs(blob, fileName);
+    })
 }
 
 // const closeTools = ()=>{
@@ -227,6 +250,7 @@ const changeHandler = (colors)=> {
                 <button id="draw"  className="controls__draw LC-active tools"onClick={(e)=>{
                     changeTool("draw");
                     addActiveClass(e.currentTarget);
+                    customizeBtn.current.style.scale = "1";
                     document.querySelectorAll(".colors").forEach(el=>{
                         if(el.classList.contains("colors-gone")){
                             el.classList.remove("colors-gone");
@@ -237,6 +261,7 @@ const changeHandler = (colors)=> {
                 <button id="erase" className="controls__erase tools" onClick={(e)=>{
                     changeTool("erase");
                     addActiveClass(e.currentTarget);
+                    customizeBtn.current.style.scale = "0";
                     document.querySelectorAll(".colors").forEach(el=>{
                         if(el.classList.contains("colors-visible")){
                             el.classList.remove("colors-visible");
@@ -246,7 +271,7 @@ const changeHandler = (colors)=> {
 
                 }}><img src={Eraser} alt=""/></button>
                 <button id="clear" onClick={clear} className="tools"><img src={Trash} alt=""/></button>
-                <button style={{backgroundColor: "white", position: "relative"}} className="tools"><img src={Customize} alt=""/><ColorPicker
+                <button style={{backgroundColor: "white", position: "relative"}} className="tools" ref={customizeBtn}><img src={Customize} alt=""/><ColorPicker
                 
                    animation="slide-up"
                    color={'#36c'}
@@ -256,6 +281,8 @@ const changeHandler = (colors)=> {
                 <button className="colors tools" style={{backgroundColor: "black"}}></button>
                 <button className="colors tools" style={{backgroundColor: "red"}}></button>
                 <button className="colors tools" style={{backgroundColor: "blue"}}></button>
+                <button id="download" onClick={download}><img src={Download} alt=""/></button>
+
             </div>
 
         </div>

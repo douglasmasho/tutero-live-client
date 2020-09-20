@@ -81,7 +81,7 @@ const Controls = (props) => {
         if(isRecordingRef.current){
             const monthArr = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
             const date = new Date();
-            const timeStamp = date.valueOf();
+            const timeStamp = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
             const day = date.getDate();
             const month = monthArr[date.getMonth()];
             const year = date.getFullYear();
