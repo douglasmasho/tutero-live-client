@@ -69,7 +69,7 @@ const LiveCanvas = (props) => {
             // console.log("peer is erasing");
             addActiveClass(document.getElementById("erase"));
             // console.log(document.getElementById("erase"));
-            customizeBtn.current.style.scale = "0";
+            customizeBtn.current.classList.add("colors-gone");
             document.querySelectorAll(".colors").forEach(el=>{
                 if(el.classList.contains("colors-visible")){
                     el.classList.remove("colors-visible");
@@ -82,7 +82,9 @@ const LiveCanvas = (props) => {
         socket.on("unerase", ()=>{
             addActiveClass(document.getElementById("draw"));
             // console.log(document.getElementById("draw"));
-            customizeBtn.current.style.scale = "1";
+            if(customizeBtn.current.classList.contains("colors-gone")){
+                customizeBtn.current.classList.remove("colors-gone")
+            }
             document.querySelectorAll(".colors").forEach(el=>{
                 if(el.classList.contains("colors-gone")){
                     el.classList.remove("colors-gone");
@@ -250,7 +252,9 @@ const download = ()=>{
                 <button id="draw"  className="controls__draw LC-active tools"onClick={(e)=>{
                     changeTool("draw");
                     addActiveClass(e.currentTarget);
-                    customizeBtn.current.style.scale = "1";
+                    if(customizeBtn.current.classList.contains("colors-gone")){
+                        customizeBtn.current.classList.remove("colors-gone")
+                    }
                     document.querySelectorAll(".colors").forEach(el=>{
                         if(el.classList.contains("colors-gone")){
                             el.classList.remove("colors-gone");
@@ -261,7 +265,7 @@ const download = ()=>{
                 <button id="erase" className="controls__erase tools" onClick={(e)=>{
                     changeTool("erase");
                     addActiveClass(e.currentTarget);
-                    customizeBtn.current.style.scale = "0";
+                    customizeBtn.current.classList.add("colors-gone");
                     document.querySelectorAll(".colors").forEach(el=>{
                         if(el.classList.contains("colors-visible")){
                             el.classList.remove("colors-visible");
