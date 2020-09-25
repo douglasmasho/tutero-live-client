@@ -20,18 +20,24 @@ const LiveCanvas = (props) => {
     containerRef = useRef(),   
     toolRef = useRef(),
     [customColor, setCustomColor] = useState(),
+    // [isPeerDrawing, setIsPeerDrawing] = useState(false),
+    // [amIDrawing, setAmIDrawing] = useState(false),
     colorRef = useRef(),
     customEl = useRef(),
     paintingRef = useRef(),
     lcControls = useRef(),
     openTools = useRef(),
     customizeBtn = useRef(),
-    customColorRef = useRef();
+    customColorRef = useRef(),
+    isPeerDrawingRef = useRef(),
+    amIDrawingRef = useRef();
     scrollFromPeer.current = false;
     toolRef.current = "draw";
     paintingRef.current = false;
     colorRef.current = "black";
     customColorRef.current = customColor;
+    amIDrawingRef.current = false;
+    isPeerDrawingRef.current = false;
 
     useEffect(()=>{
         ctx.current = canvasRef.current.getContext("2d");
@@ -51,13 +57,16 @@ const LiveCanvas = (props) => {
 
         ////socket events ///////////////////////////////////////////////
         socket.on("draw", data=>{
-            // console.log("peers is drawing")
+            // console.log("peers is drawing");
             const {x,y,type, color} = data;
             // console.log(x,y,type,color);
             switch(type){
                 case "start":startPosition(x,y,color);
+                    isPeerDrawingRef.current = true;                         
                 break;
                 case "stop": finishedPosition();
+                isPeerDrawingRef.current = false;                                                 
+
                 break;
                 case "draw": draw(x,y);
             }
@@ -169,14 +178,17 @@ const LiveCanvas = (props) => {
    }
 
    const drawFunc = (e)=>{
-    // console.log(e)
+    // console.log(e);
+
     const x = e.clientX - document.querySelector("#canvas").getBoundingClientRect().x;
     const y = e.clientY - document.querySelector("#canvas").getBoundingClientRect().y;
     let type;
     switch(e.type){
         case "mousedown": type = "start";
+                        amIDrawingRef.current = true;
          break;
         case "mouseup": type ="stop";
+                        amIDrawingRef.current = false;
         break;
         case "mousemove": type="draw";
         default: //
@@ -184,13 +196,15 @@ const LiveCanvas = (props) => {
 
     if(paintingRef.current || type === "start") /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     socket.emit("draw", {x,y,type,color: colorRef.current});
-
+    
     switch(type){
         case "start": startPosition(x,y,false);
         break;
         case "stop": finishedPosition();
         break;
-        case "draw": draw(x,y)
+        case "draw": if(amIDrawingRef.current && !isPeerDrawingRef.current){
+            draw(x,y);
+        }
     }
 }
 
