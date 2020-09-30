@@ -9,7 +9,6 @@ import {socketContext} from "../Context/socketContext";
 import Icon from "./Icon";
 import Middle from './Middle';
 import Logo from "../assets/logo.svg";
-import Test from "./Test"
 // const worker = new Worker("../worker.js");
 
 const Room = (props) => {
@@ -30,7 +29,6 @@ const Room = (props) => {
           [connectionMade, setConnectionMade] = useState(false),
           [otherUsers, setOtherusers] = useState([]),
           logoRef = useRef(),
-          testRef = useRef(),
           videoStream = useRef(),
           screenSharedRef = useRef(false),
           queryNoticeRef = useRef(),
@@ -244,7 +242,7 @@ const Room = (props) => {
             console.log(screenSharedRef);
             videoRef.current.srcObject = videoStream.current;
         }
-    },[screenSharedRef.current, videoStream.current])
+    },[])
 
     const shareScreen = useCallback(()=>{
         navigator.mediaDevices.getDisplayMedia().then(stream => {

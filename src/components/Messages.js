@@ -32,7 +32,7 @@ class Messages extends Component {
             {
                 this.props.msgArr.map((msg,index)=>{
                     if(msg.isMine){
-                       return <div key={index} className="message--div">
+                       return <div key={msg.msgId} className="message--div">
                                 <div>
                                    <img className="message--delete" src={TrashIcon} alt="" onClick={this.deleteMessage} data-id={msg.msgId}/>
                                 </div>
