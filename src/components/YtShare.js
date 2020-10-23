@@ -1,16 +1,7 @@
 import React, {useRef, useEffect, useState, useContext} from 'react';
 import Plus from "../assets/from xd/plus.svg";
-import Play from "../assets/from xd/play.svg";
-import Pause from "../assets/from xd/pause.svg";
-import Unmute from "../assets/from xd/unmute.svg";
-import Mute from "../assets/from xd/mute.svg";
-import Prev from "../assets/from xd/prev.svg";
-import Next from "../assets/from xd/next.svg";
-import Link from "../assets/from xd/link.svg";
-import lottie from "lottie-web";
-import animLoading from "../animations/loading.json";
 import  {socketContext} from "../Context/socketContext";
-
+require("dotenv").config();
 
 const YtShare = (props) => {
     const ytPlayer = useRef(),
@@ -39,6 +30,7 @@ const YtShare = (props) => {
 
 
     useEffect(()=>{
+        console.log(process.env)
         const tag = document.createElement("script"); ///create a new script tag
         tag.src = "https://www.youtube.com/iframe_api";
         //find the first script tag
@@ -75,6 +67,21 @@ const YtShare = (props) => {
        //listen to peerIframeReady message
        socket.on("peerIframeReady", data=>{
         setPeerIframeReady(true);
+       })
+
+       socket.on("playlist resp", data=>{
+           console.log(data);
+                           //loop through items and retreive each item.snippet.resourceId.videoId
+                let videosArr = []; 
+                data.items.forEach(item=>{
+                    videosArr.push(item.snippet.resourceId.videoId)
+                })
+                const videosString = videosArr.join(",");
+                //send instruction to the peer
+                 peer.send(JSON.stringify({type: "playlist", string: videosString}));
+                //load playlist with this string
+                ytPlayer.current.loadPlaylist(videosString, 0,0);
+
        })
 
        return ()=>{
@@ -257,20 +264,7 @@ const YtShare = (props) => {
         //fetch 
         if(playlistID){
             plErrorRef.current.style.display = "none"
-            fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistID}&key=${API_KEY}`).then(dataJson=>{
-                return dataJson.json()
-            }).then(data=>{
-                //loop through items and retreive each item.snippet.resourceId.videoId
-                let videosArr = []; 
-                data.items.forEach(item=>{
-                    videosArr.push(item.snippet.resourceId.videoId)
-                })
-                const videosString = videosArr.join(",");
-                //send instruction to the peer
-                 peer.send(JSON.stringify({type: "playlist", string: videosString}));
-                //load playlist with this string
-                ytPlayer.current.loadPlaylist(videosString, 0,0);
-            })
+            socket.emit("Fetch playlist", playlistID);    
         }else{
             plErrorRef.current.style.display = "block";
             setTimeout(()=>{
