@@ -13,7 +13,7 @@ const YtShare = (props) => {
            positionInput = useRef(),
            plErrorRef = useRef(),
            vErrorRef = useRef(),
-           API_KEY = "AIzaSyDxDypFD7OMDH4-lPrs--alG88QJd6HXs4",
+
            loadPlayerbtn = useRef(),
            modalRef = useRef(),
            addBtn = useRef(),
