@@ -11,16 +11,21 @@ import Middle from './Middle';
 import Logo from "../assets/logo.svg";
 // const worker = new Worker("../worker.js");
 
+
+
 const Room = (props) => {
     const roomID = props.routeArgs.match.params.roomID,
           [peers, setPeers] = useState([]),//////////////////////your peer is here
           [mode, setMode] = useState("default"),
           [currentFeature, setCurrentFeature] = useState(""),
+          [file, SetFileState] = useState(null),
           videoRef = useRef(),
           peersRef = useRef([]),
           socketRef = useRef(),
           controlsRef= useRef(),
           otherVideo = useRef(),
+          fileInpRef= useRef(),
+          fileRef = useRef(),
           animContainerLoading = useRef(),
           animRefLoading = useRef(),
           videoPausedRef = useRef(),
@@ -34,9 +39,39 @@ const Room = (props) => {
           queryNoticeRef = useRef(),
           [screenShared, setScreenShared] = useState(false);
           screenSharedRef.current = screenShared;
+          fileRef.current = file;
 
 
     socketRef.current = useContext(socketContext);
+
+    const setFile = (e)=>{
+        SetFileState(e.target.files[0]);
+
+    }
+
+
+    const uploadFile = (e)=>{
+        e.preventDefault();
+        const fileSlice = file.slice(0,100000);
+        console.log(fileSlice);
+
+
+        const fileReader = new FileReader(); ///initialize a fileReader 
+
+        fileReader.readAsArrayBuffer(fileSlice);///read as array buffer
+
+        fileReader.onload = (evt)=>{
+            const arrayBuffer = fileReader.result;
+            ///upload to server
+            socketRef.current.emit("slice upload", {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                data: arrayBuffer, ///the data should be the array buffer of the current slice
+            })
+        }
+        
+    }
 
     const pauseTrack = useCallback((track)=>{
         switch(track){
@@ -74,6 +109,35 @@ const Room = (props) => {
     },[])
 
     useEffect(()=>{
+
+        socketRef.current.on("new slice request", data=>{
+            console.log(data.currentSlice);
+            const position = data.currentSlice * 100000;
+            ///async function so dont use state, use ref
+            const newSlice = fileRef.current.slice(position, position + Math.min(100000, fileRef.current.size - position));
+            console.log(newSlice);
+
+            const fileReader = new FileReader();
+            fileReader.readAsArrayBuffer(newSlice); 
+
+            fileReader.onload = (evt)=>{
+                const arrayBuffer = fileReader.result;
+                ///upload to server
+                socketRef.current.emit("slice upload", {
+                    name: fileRef.current.name,
+                    size: fileRef.current.size,
+                    type: fileRef.current.type,
+                    data: arrayBuffer, ///the data should be the array buffer of the current slice
+                })
+            }
+
+        })
+
+        socketRef.current.on("upload complete", ()=>{
+            console.log("the upload is complete")
+        })
+
+
         const x = window.matchMedia("(max-width: 900px)");
 
         //query function 
@@ -355,6 +419,12 @@ const Room = (props) => {
                     </div>  
                 </div>
               
+              <div className="center-hrz">
+                  <form onSubmit={uploadFile}>
+                     <input type="file" ref={fileInpRef} onChange={setFile}/>
+                      <button type="submit">Submit</button>
+                  </form>
+              </div>
         </div>
 
      );
