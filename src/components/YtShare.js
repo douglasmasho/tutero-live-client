@@ -125,49 +125,54 @@ const YtShare = (props) => {
 
 
     const handleIncomingData = (data)=>{
-        const obj = JSON.parse(data);
-        switch(obj.type){
-            case "play":
-                ytPlayer.current.playVideo();
-                if(document.querySelector(".activePP")){
-                    document.querySelector(".activePP").classList.remove("activePP")
-                }
-                playBtnRef.current.classList.add("activePP");
-                break;
-            case "pause":
-                ytPlayer.current.pauseVideo();
-                if(document.querySelector(".activePP")){
-                    document.querySelector(".activePP").classList.remove("activePP")
-                }
-                pauseBtnRef.current.classList.add("activePP");
-                break;
-            case "video":
-                ytPlayer.current.loadVideoById(obj.data);  
-                ytPlayer.current.playVideo();
-                addActive("pp", playBtnRef.current);
-                break;
-            case "goTo":
-                ytPlayer.current.seekTo(obj.time, true);
-                break;
-            case "playlist":
-                ytPlayer.current.loadPlaylist(obj.string);
-                ytPlayer.current.playVideo();
-                addActive("pp", playBtnRef.current);
-                break;
-            case "next":
-                 ytPlayer.current.nextVideo();  
-                break; 
-            case "previous":
-                 ytPlayer.current.previousVideo();
-                 break;
-            case "stopSession":
-                props.setIsytShareOn(false);
-                break;     
-            case "position":
-                ytPlayer.current.playVideoAt(obj.index);  
-                break;
-            default: ///do nothing
+        console.log(data, "loooloo");
+        if(typeof(data) === "string"){
+            const obj = JSON.parse(data);
+
+            switch(obj.type){
+                case "play":
+                    ytPlayer.current.playVideo();
+                    if(document.querySelector(".activePP")){
+                        document.querySelector(".activePP").classList.remove("activePP")
+                    }
+                    playBtnRef.current.classList.add("activePP");
+                    break;
+                case "pause":
+                    ytPlayer.current.pauseVideo();
+                    if(document.querySelector(".activePP")){
+                        document.querySelector(".activePP").classList.remove("activePP")
+                    }
+                    pauseBtnRef.current.classList.add("activePP");
+                    break;
+                case "video":
+                    ytPlayer.current.loadVideoById(obj.data);  
+                    ytPlayer.current.playVideo();
+                    addActive("pp", playBtnRef.current);
+                    break;
+                case "goTo":
+                    ytPlayer.current.seekTo(obj.time, true);
+                    break;
+                case "playlist":
+                    ytPlayer.current.loadPlaylist(obj.string);
+                    ytPlayer.current.playVideo();
+                    addActive("pp", playBtnRef.current);
+                    break;
+                case "next":
+                     ytPlayer.current.nextVideo();  
+                    break; 
+                case "previous":
+                     ytPlayer.current.previousVideo();
+                     break;
+                case "stopSession":
+                    props.setIsytShareOn(false);
+                    break;     
+                case "position":
+                    ytPlayer.current.playVideoAt(obj.index);  
+                    break;
+                default: ///do nothing
+            }
         }
+
     }
 
     const loadYTVideoPlayer = ()=>{
