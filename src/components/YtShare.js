@@ -126,7 +126,7 @@ const YtShare = (props) => {
 
     const handleIncomingData = (data)=>{
         console.log(data, "loooloo");
-        if(typeof(data) === "string"){
+
             const obj = JSON.parse(data);
 
             switch(obj.type){
@@ -171,7 +171,7 @@ const YtShare = (props) => {
                     break;
                 default: ///do nothing
             }
-        }
+        
 
     }
 
@@ -376,9 +376,13 @@ const YtShare = (props) => {
         }
     }
 
+    const sendDummy = ()=>{
+        peer.send("string")
+    }
+
     return ( 
         <div>  
-
+            <button onClick={sendDummy}>Dummy data</button>
            <div className="center-hrz u-margin-top u-margin-bottom" style={{position: "relative"}}>
                <div>
                     <div id="ytVideo" ref={playerRef}>
