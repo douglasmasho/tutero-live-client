@@ -3,7 +3,7 @@ import lottie from "lottie-web";
 import animLoading from "../animations/loading.json";
 import streamSaver from "streamsaver";
 
-const worker = new Worker("../worker.js");
+// const worker = new Worker("../worker.js");
 
 const FileShare = (props) => {
     const peer = props.peer,
@@ -26,14 +26,14 @@ const FileShare = (props) => {
                 fileNameRef.current = parsed.fileName
 
             }else{ //if its not done
-                worker.postMessage(data) ///post the chunk to the worker
+                // worker.postMessage(data) ///post the chunk to the worker
             }
          }
 
             
         const download = ()=> {
             setGotFile(false);
-            worker.postMessage("download");
+            // worker.postMessage("download");
 
             // worker.addEventListener("message", event=>{
             //     //turn the blob back into a stream
@@ -89,12 +89,12 @@ const FileShare = (props) => {
         });
         peer.on("data", handleIncomingData); ///the callback will automatically receive data argument;
         //put the event listener here
-        worker.addEventListener("message", event=>{
-            //turn the blob back into a stream
-            const stream = event.data.stream();
-            const fileStream = streamSaver.createWriteStream(fileNameRef.current);
-            stream.pipeTo(fileStream);
-        })
+        // worker.addEventListener("message", event=>{
+        //     //turn the blob back into a stream
+        //     const stream = event.data.stream();
+        //     const fileStream = streamSaver.createWriteStream(fileNameRef.current);
+        //     stream.pipeTo(fileStream);
+        // })
 
         // return ()=>{
         //     worker.removeEventListener("message");

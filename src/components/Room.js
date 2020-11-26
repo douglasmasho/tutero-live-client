@@ -9,7 +9,7 @@ import {socketContext} from "../Context/socketContext";
 import Icon from "./Icon";
 import Middle from './Middle';
 import Logo from "../assets/logo.svg";
-// const worker = new Worker("../worker.js");
+const worker = new Worker("../worker.js");
 
 
 
@@ -53,23 +53,15 @@ const Room = (props) => {
     const uploadFile = (e)=>{
         e.preventDefault();
         const fileSlice = file.slice(0,100000);
-        ////fuhireuhiuhieufhiufehiuhfeiuhfeiuh
+        ////fuhireuhiuhieufhiufehiuhfeiuhfeiuh dev 3
 
 
-        const fileReader = new FileReader(); ///initialize a fileReader 
-
-        fileReader.readAsArrayBuffer(fileSlice);///read as array buffer
-
-        fileReader.onload = (evt)=>{
-            const arrayBuffer = fileReader.result;
-            ///upload to server
-            socketRef.current.emit("slice upload", {
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                data: arrayBuffer, ///the data should be the array buffer of the current slice
-            })
-        }
+        socketRef.current.emit("slice upload", {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            data: fileSlice, ///the data should be the array buffer of the current slice
+        })
         
     }
 
@@ -109,6 +101,29 @@ const Room = (props) => {
     },[])
 
     useEffect(()=>{
+
+        worker.addEventListener("message" ,event=>{ 
+            switch(event.data.type){
+                case "request new slice":
+                    socketRef.current.emit("request new slice from peer", event.data);
+                    break;
+                case "file upload complete":
+                    const bufferArr = event.data.fileObj.data;
+                    console.log(event.data.fileObj.data);
+                    ////////////this is where you do the file download stuff
+
+
+
+
+
+                    socketRef.current.emit("upload complete")///send to first peer that the upload is complete       
+            }
+        })
+
+        socketRef.current.on("slice received", data=>{
+            console.log("slice received");
+            worker.postMessage(data);
+        })
 
         socketRef.current.on("end upload", ()=>{
             console.log("upload has ended mybruh")
