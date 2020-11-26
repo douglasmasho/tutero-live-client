@@ -110,6 +110,13 @@ const Room = (props) => {
 
     useEffect(()=>{
 
+        socketRef.current.on("end upload", ()=>{
+            console.log("upload has ended mybruh")
+        })
+        socketRef.current.on("upload error", ()=>{
+            console.log("there has been an error mybruh")
+        })
+
         socketRef.current.on("new slice request", data=>{
             console.log(data.currentSlice);
             const position = data.currentSlice * 100000;
