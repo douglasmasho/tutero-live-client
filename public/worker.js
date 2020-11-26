@@ -59,6 +59,6 @@ self.addEventListener("message", event=>{
         delete files[event.data.name];
     }else{
         // console.log("request another slice");
-        self.postMessage({type: "request new slice", currentSlice: files[event.data.name].slice})
+        self.postMessage({type: "request new slice", currentSlice: files[event.data.name].slice, size: files[event.data.name].size})
     }
 })
