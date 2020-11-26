@@ -427,7 +427,7 @@ const Room = (props) => {
         icons = <>
                     <Icon feature={"ytShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
                     <Icon feature={"liveCanvas"} featureMode={initFeatureMode} logo={logoRef.current}/>
-                    <Icon feature={"fileShare"}  featureMode={initFeatureMode} logo={logoRef.current}/>
+                    {/* <Icon feature={"fileShare"}  featureMode={initFeatureMode} logo={logoRef.current}/> */}
                     <Icon feature={"liveChat"} featureMode={initFeatureMode} logo={logoRef.current}/>
                </>
     }else{
