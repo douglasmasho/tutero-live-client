@@ -47,18 +47,18 @@ self.addEventListener("message", event=>{
         files[event.data.name] = Object.assign(struct, event.data);
         files[event.data.name].data = []
     }
-    console.log(files[event.data.name]);
+    // console.log(files[event.data.name]);
     //push the slice into the data array
     files[event.data.name].data.push(event.data.data);
     files[event.data.name].slice++;
     console.log(files[event.data.name].slice);
 
     if(files[event.data.name].slice * 100000 >= event.data.size){
-        console.log("done", files[event.data.name].data);
+        // console.log("done", files[event.data.name].data);
         self.postMessage({type: "file upload complete", fileObj: files[event.data.name]});
         delete files[event.data.name];
     }else{
-        console.log("request another slice");
+        // console.log("request another slice");
         self.postMessage({type: "request new slice", currentSlice: files[event.data.name].slice})
     }
 })
