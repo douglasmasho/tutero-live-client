@@ -53,7 +53,7 @@ const Room = (props) => {
     const uploadFile = (e)=>{
         e.preventDefault();
         const fileSlice = file.slice(0,100000);
-        console.log(fileSlice);
+        ////fuhireuhiuhieufhiufehiuhfeiuhfeiuh
 
 
         const fileReader = new FileReader(); ///initialize a fileReader 
