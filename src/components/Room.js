@@ -19,15 +19,15 @@ const Room = (props) => {
           [peers, setPeers] = useState([]),//////////////////////your peer is here
           [mode, setMode] = useState("default"),
           [currentFeature, setCurrentFeature] = useState(""),
-          [file, SetFileState] = useState(null),
+        //   [file, SetFileState] = useState(null),
           videoRef = useRef(),
           peersRef = useRef([]),
           socketRef = useRef(),
           controlsRef= useRef(),
           otherVideo = useRef(),
-          fileInpRef= useRef(),
-          fileRef = useRef(),
-          progressRef = useRef(),
+        //   fileInpRef= useRef(),
+        //   fileRef = useRef(),
+        //   progressRef = useRef(),
           animContainerLoading = useRef(),
           animRefLoading = useRef(),
           videoPausedRef = useRef(),
@@ -42,33 +42,33 @@ const Room = (props) => {
           queryNoticeRef = useRef(),
           [screenShared, setScreenShared] = useState(false);
           screenSharedRef.current = screenShared;
-          fileRef.current = file;
+        //   fileRef.current = file;
 
 
     socketRef.current = useContext(socketContext);
 
-    const setFile = (e)=>{
-        SetFileState(e.target.files[0]);
+    // const setFile = (e)=>{
+    //     SetFileState(e.target.files[0]);
 
-    }
+    // }
 
 
-    const uploadFile = (e)=>{
-        e.preventDefault();
-        const fileSlice = file.slice(0,100000);
-        console.log(fileSlice);
-        ////fuhireuhiuhieufhiufehiuhfeiuhfeiuh dev 3
-        fileInpRef.current.style.display = "none"
+    // const uploadFile = (e)=>{
+    //     e.preventDefault();
+    //     const fileSlice = file.slice(0,100000);
+    //     console.log(fileSlice);
+    //     ////fuhireuhiuhieufhiufehiuhfeiuhfeiuh dev 3
+    //     fileInpRef.current.style.display = "none"
 
-        socketRef.current.emit("slice upload", {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            data: fileSlice, ///the data should be the array buffer of the current slice
-        })
+    //     socketRef.current.emit("slice upload", {
+    //         name: file.name,
+    //         size: file.size,
+    //         type: file.type,
+    //         data: fileSlice, ///the data should be the array buffer of the current slice
+    //     })
         
         
-    }
+    // }
 
     const pauseTrack = useCallback((track)=>{
         switch(track){
@@ -107,96 +107,96 @@ const Room = (props) => {
 
     useEffect(()=>{
 
-        worker.addEventListener("message" ,event=>{ 
-            switch(event.data.type){
-                case "request new slice":
-                    socketRef.current.emit("request new slice from peer", event.data);
-                    const progress = ((event.data.currentSlice * 100000) / event.data.size) * 100;
-                    console.log(progress)
-                    progressRef.current.value = progress;
-                    console.log(progressRef.current)
-                    break;
-                case "file upload complete":
-                    progressRef.current.value = 100;
-                    setTimeout(()=>{
-                        progressRef.current.value = 0;
-                    }, 2000)
-                    const bufferArr = event.data.fileObj.data;
-                    console.log(event.data.fileObj.data);
-                    ////////////this is where you do the file download stuff
-                    const fileBlob = new Blob(bufferArr);
-                    console.log(fileBlob);
+        // worker.addEventListener("message" ,event=>{ 
+        //     switch(event.data.type){
+        //         case "request new slice":
+        //             socketRef.current.emit("request new slice from peer", event.data);
+        //             const progress = ((event.data.currentSlice * 100000) / event.data.size) * 100;
+        //             console.log(progress)
+        //             progressRef.current.value = progress;
+        //             console.log(progressRef.current)
+        //             break;
+        //         case "file upload complete":
+        //             progressRef.current.value = 100;
+        //             setTimeout(()=>{
+        //                 progressRef.current.value = 0;
+        //             }, 2000)
+        //             const bufferArr = event.data.fileObj.data;
+        //             console.log(event.data.fileObj.data);
+        //             ////////////this is where you do the file download stuff
+        //             const fileBlob = new Blob(bufferArr);
+        //             console.log(fileBlob);
 
-                    const downloadBlob = (blob, name)=>{
-                        const blobUrl = URL.createObjectURL(blob);
+        //             const downloadBlob = (blob, name)=>{
+        //                 const blobUrl = URL.createObjectURL(blob);
 
-                        const link = document.createElement("a");
+        //                 const link = document.createElement("a");
 
-                        link.href = blobUrl;
-                        link.download = name;
+        //                 link.href = blobUrl;
+        //                 link.download = name;
 
-                        downloadBtn.current.appendChild(link);
+        //                 downloadBtn.current.appendChild(link);
 
-                        link.dispatchEvent(
-                            new MouseEvent('click', { 
-                              bubbles: true, 
-                              cancelable: true, 
-                              view: window 
-                            })
-                          );
+        //                 link.dispatchEvent(
+        //                     new MouseEvent('click', { 
+        //                       bubbles: true, 
+        //                       cancelable: true, 
+        //                       view: window 
+        //                     })
+        //                   );
                         
-                          // Remove link from body
-                          downloadBtn.current.removeChild(link);
-                    }
+        //                   // Remove link from body
+        //                   downloadBtn.current.removeChild(link);
+        //             }
 
-                    downloadBlob(fileBlob, event.data.fileObj.name);
-
-
+        //             downloadBlob(fileBlob, event.data.fileObj.name);
 
 
-                    socketRef.current.emit("upload complete")///send to first peer that the upload is complete       
-            }
-        })
 
-        socketRef.current.on("slice received", data=>{
-            console.log("slice received");
-            worker.postMessage(data);
-        })
 
-        socketRef.current.on("end upload", ()=>{
-            console.log("your upload has ended");
-            fileInpRef.current.style.display = "block";
-            progressRef.current.value = 100;
-            setTimeout(()=>{
-                progressRef.current.value = 0;
-            }, 2000)
+        //             socketRef.current.emit("upload complete")///send to first peer that the upload is complete       
+        //     }
+        // })
 
-        })
-        socketRef.current.on("upload error", ()=>{
-            console.log("there has been an error mybruh")
-        })
+        // socketRef.current.on("slice received", data=>{
+        //     console.log("slice received");
+        //     worker.postMessage(data);
+        // })
 
-        socketRef.current.on("new slice request", data=>{
-            console.log(data.currentSlice);
-            const position = data.currentSlice * 100000;
-            const progress = (position / fileRef.current.size) * 100;
-            progressRef.current.value = progress;
-            ///async function so dont use state, use ref
-            const newSlice = fileRef.current.slice(position, position + Math.min(100000, fileRef.current.size - position));
-            console.log(newSlice);
+        // socketRef.current.on("end upload", ()=>{
+        //     console.log("your upload has ended");
+        //     fileInpRef.current.style.display = "block";
+        //     progressRef.current.value = 100;
+        //     setTimeout(()=>{
+        //         progressRef.current.value = 0;
+        //     }, 2000)
 
-            socketRef.current.emit("slice upload", {
-                name: fileRef.current.name,
-                size: fileRef.current.size,
-                type: fileRef.current.type,
-                data: newSlice, ///the data should be the array buffer of the current slice
-            })
+        // })
+        // socketRef.current.on("upload error", ()=>{
+        //     console.log("there has been an error mybruh")
+        // })
+
+        // socketRef.current.on("new slice request", data=>{
+        //     console.log(data.currentSlice);
+        //     const position = data.currentSlice * 100000;
+        //     const progress = (position / fileRef.current.size) * 100;
+        //     progressRef.current.value = progress;
+        //     ///async function so dont use state, use ref
+        //     const newSlice = fileRef.current.slice(position, position + Math.min(100000, fileRef.current.size - position));
+        //     console.log(newSlice);
+
+        //     socketRef.current.emit("slice upload", {
+        //         name: fileRef.current.name,
+        //         size: fileRef.current.size,
+        //         type: fileRef.current.type,
+        //         data: newSlice, ///the data should be the array buffer of the current slice
+        //     })
             
-        })
+        // })
 
-        socketRef.current.on("upload complete", ()=>{
-            console.log("the upload is complete")
-        })
+        // socketRef.current.on("upload complete", ()=>{
+        //     console.log("the upload is complete")
+        // })
 
 
         const x = window.matchMedia("(max-width: 900px)");
@@ -480,7 +480,7 @@ const Room = (props) => {
                     </div>  
                 </div>
               
-              <div className="center-hrz">
+              {/* <div className="center-hrz">
                   <form onSubmit={uploadFile}>
                      <input type="file" ref={fileInpRef} onChange={setFile}/>
                       <button type="submit">Submit</button>
@@ -488,7 +488,7 @@ const Room = (props) => {
                           <progress min="0" max="100" ref={progressRef} value="0"></progress>
                       </div>
                   </form>
-              </div>
+              </div> */}
         </div>
 
      );

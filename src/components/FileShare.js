@@ -1,145 +1,146 @@
-import React, { useEffect, useRef, useState } from 'react';
-import lottie from "lottie-web";
-import animLoading from "../animations/loading.json";
-import streamSaver from "streamsaver";
+import React, { useEffect, useRef, useState , useContext} from 'react';
+import {socketContext} from "../Context/socketContext";
 
-// const worker = new Worker("../worker.js");
+const worker = new Worker("../worker.js");
 
 const FileShare = (props) => {
     const peer = props.peer,
           connectionMade = props.connectionMade,
-          animContainerLoading = useRef(),
-          animRefLoading = useRef(),
-          downloadPrompt = useRef(),
-          sendFilePrompt = useRef(),
-          [file, setFile] = useState(),
-          fileNameRef = useRef(""),
-          [gotFile, setGotFile] = useState(false),
-          fileSentRef = useRef();
+          socketRef = useRef(),
+          fileInpRef= useRef(),
+          fileRef = useRef(null),
+          progressRef = useRef(),
+          downloadBtn = useRef(),
+          [file, SetFileState] = useState(null);
+          socketRef.current = useContext(socketContext);
+          fileRef.current = file;
 
 
-
-        const handleIncomingData = (data)=> {
-            if(data.toString().includes("done")){ ///if the data comes in as JSON and includes done
-                setGotFile(true);
-                const parsed = JSON.parse(data);
-                fileNameRef.current = parsed.fileName
-
-            }else{ //if its not done
-                // worker.postMessage(data) ///post the chunk to the worker
-            }
-         }
-
-            
-        const download = ()=> {
-            setGotFile(false);
-            // worker.postMessage("download");
-
-            // worker.addEventListener("message", event=>{
-            //     //turn the blob back into a stream
-            //     const stream = event.data.stream();
-            //     const fileStream = streamSaver.createWriteStream(fileNameRef.current);
-            //     stream.pipeTo(fileStream);
-            // })
-
-        }
-
-        const dontDownload = ()=>{
-            setGotFile(false);
+          const setFile = (e)=>{
+            SetFileState(e.target.files[0]);
+            console.log(e.target.files[0], fileRef);
         }
     
-        const selectFile = (e)=> {
-            // setFile(e.target.files[0]); 
-            setFile(e.target.files[0]);
-        }
     
-        const sendFile = ()=> { //////////reading the data and sending it as chunks
-            const stream = file.stream(); //convert the blob into a stream;
-            const reader = stream.getReader(); //this reader will be able to read the stream;
+        const uploadFile = (e)=>{
+            e.preventDefault();
+            const fileSlice = file.slice(0,100000);
+            console.log(fileSlice);
+            ////fuhireuhiuhieufhiufehiuhfeiuhfeiuh dev 3
+            fileInpRef.current.style.display = "none"
+    
+            socketRef.current.emit("slice upload", {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                data: fileSlice, ///the data should be the array buffer of the current slice
+            })     
+        }
 
-            reader.read().then(obj=>{ //////////////running recursively
-                handleReading(obj.done, obj.value)
-            });
 
-            const handleReading = (done,value) =>{ 
-                if(done){ ////if the chunk is done being read, do this
-                    peer.write(JSON.stringify({done: true, fileName: file.name})) ///send the other peer json telling them the file name and that it's done done.
-                    return;
-                }
+     useEffect(()=>{
 
-                peer.write(value); /////////if the chunk is not yet done being read send the current chunk that is returned from the promise
-                reader.read().then(obj=>{ /////////read the next chunk and send it again //////recursively
-                     handleReading(obj.done, obj.value)
-                })
+        worker.addEventListener("message" ,event=>{ 
+            switch(event.data.type){
+                case "request new slice":
+                    socketRef.current.emit("request new slice from peer", event.data);
+                    const progress = ((event.data.currentSlice * 100000) / event.data.size) * 100;
+                    console.log(progress)
+                    progressRef.current.value = progress;
+                    console.log(progressRef.current)
+                    break;
+                case "file upload complete":
+                    progressRef.current.value = 100;
+                    setTimeout(()=>{
+                        progressRef.current.value = 0;
+                    }, 2000)
+                    const bufferArr = event.data.fileObj.data;
+                    console.log(event.data.fileObj.data);
+                    ////////////this is where you do the file download stuff
+                    const fileBlob = new Blob(bufferArr);
+                    console.log(fileBlob);
+
+                    const downloadBlob = (blob, name)=>{
+                        const blobUrl = URL.createObjectURL(blob);
+
+                        const link = document.createElement("a");
+
+                        link.href = blobUrl;
+                        link.download = name;
+
+                        downloadBtn.current.appendChild(link);
+
+                        link.dispatchEvent(
+                            new MouseEvent('click', { 
+                              bubbles: true, 
+                              cancelable: true, 
+                              view: window 
+                            })
+                          );
+                        
+                          // Remove link from body
+                          downloadBtn.current.removeChild(link);
+                    }
+                    downloadBlob(fileBlob, event.data.fileObj.name);
+                    socketRef.current.emit("upload complete")///send to first peer that the upload is complete       
             }
+        })
 
-            fileSentRef.current.style.display = "block";
+
+        socketRef.current.on("slice received", data=>{
+            console.log("slice received");
+            worker.postMessage(data);
+        })
+
+        socketRef.current.on("end upload", ()=>{
+            console.log("your upload has ended");
+            fileInpRef.current.style.display = "block";
+            progressRef.current.value = 100;
             setTimeout(()=>{
-                fileSentRef.current.style.display = "none";
+                progressRef.current.value = 0;
             }, 2000)
-        }     
 
+        })
 
+        socketRef.current.on("upload error", ()=>{
+            console.log("there has been an error mybruh")
+        })
 
-     useEffect(()=>{
-        animRefLoading.current = lottie.loadAnimation({
-            container: animContainerLoading.current,
-            animationData: animLoading,
-            loop: true,
-        });
-        peer.on("data", handleIncomingData); ///the callback will automatically receive data argument;
-        //put the event listener here
-        // worker.addEventListener("message", event=>{
-        //     //turn the blob back into a stream
-        //     const stream = event.data.stream();
-        //     const fileStream = streamSaver.createWriteStream(fileNameRef.current);
-        //     stream.pipeTo(fileStream);
-        // })
+        socketRef.current.on("new slice request", data=>{
+            console.log(data.currentSlice);
+            const position = data.currentSlice * 100000;
+            const progress = (position / fileRef.current.size) * 100;
+            progressRef.current.value = progress;
+            ///async function so dont use state, use ref
+            const newSlice = fileRef.current.slice(position, position + Math.min(100000, fileRef.current.size - position));
+            console.log(newSlice);
 
-        // return ()=>{
-        //     worker.removeEventListener("message");
-        // }
-     }, []);
+            socketRef.current.emit("slice upload", {
+                name: fileRef.current.name,
+                size: fileRef.current.size,
+                type: fileRef.current.type,
+                data: newSlice, ///the data should be the array buffer of the current slice
+            })
+            
+        })
 
+        socketRef.current.on("upload complete", ()=>{
+            console.log("the upload is complete")
+        })
 
-
-     useEffect(()=>{
-        if(connectionMade){
-          animContainerLoading.current.style.display = "none"
-        }
-
-        if(gotFile){
-            downloadPrompt.current.style.display = "block"
-         }else{
-            downloadPrompt.current.style.display = "none"
-         }
-
-        if(file){
-            sendFilePrompt.current.style.display = "block";
-        }else{
-            sendFilePrompt.current.style.display = "none";
-        }
-     })
+     }, [])
 
     return ( 
-        <div>
-            <div className="loading" ref={animContainerLoading} style={{backgroundColor: "#1e1e1e"}}>
-            </div>
-
-            <div className="fileshare--container">
-                <input onChange={selectFile} type="file" className="fileshare--input"/>
-                <button onClick={sendFile} style={{display: "none"}} ref={sendFilePrompt} className="fileshare--button">Send file</button> 
-                <p className="fileshare--message" style={{display: "none"}} ref={fileSentRef}>The file has been sent</p>
-                {/* only let the button appear when there is a file available*/}
-            </div>
-
-            <div ref={downloadPrompt}>
-                <span className="fileshare--message">Your peer sent you a File, would you like to download it?</span>
-                <button onClick={download}  className="fileshare--button">Yes</button>
-                <button onClick={dontDownload}  className="fileshare--button">No</button>
-
-            </div>
-
+        <div className="center-hrz fileshare--container center-vert--row">
+                 <form onSubmit={uploadFile}>
+                   <input type="file" ref={fileInpRef} onChange={setFile} className="fileshare--input u-margin-bottom"/>
+                   {file ? (<div className="center-hrz--col u-margin-bottom">
+                      <button type="submit" className="fileshare--button u-margin-bottom">Submit</button>
+                   </div>) : null}
+                   <progress min="0" max="100" ref={progressRef} value="0" className="fileshare--progress"></progress>
+                   <div ref={downloadBtn}>
+                   </div>
+                </form>
         </div>
      );
 }
