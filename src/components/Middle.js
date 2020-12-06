@@ -125,7 +125,7 @@ const Middle = (props) => {
                     }/>
             </div>
             {content}
-            <div style={{display: "none"}} ref={fileShareRef}>
+            <div style={{display: "none", height: "80%"}} ref={fileShareRef}>
                {fileShare}
             </div>
 

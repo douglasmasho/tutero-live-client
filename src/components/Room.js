@@ -9,22 +9,30 @@ import {socketContext} from "../Context/socketContext";
 import Icon from "./Icon";
 import Middle from './Middle';
 import Logo from "../assets/logo.svg";
-// const worker = new Worker("../worker.js");
+const worker = new Worker("../worker.js");
+var arrayBufferConcat = require('arraybuffer-concat');
+
+
 
 const Room = (props) => {
     const roomID = props.routeArgs.match.params.roomID,
           [peers, setPeers] = useState([]),//////////////////////your peer is here
           [mode, setMode] = useState("default"),
           [currentFeature, setCurrentFeature] = useState(""),
+        //   [file, SetFileState] = useState(null),
           videoRef = useRef(),
           peersRef = useRef([]),
           socketRef = useRef(),
           controlsRef= useRef(),
           otherVideo = useRef(),
+        //   fileInpRef= useRef(),
+        //   fileRef = useRef(),
+        //   progressRef = useRef(),
           animContainerLoading = useRef(),
           animRefLoading = useRef(),
           videoPausedRef = useRef(),
           audioPausedRef = useRef(),
+          downloadBtn = useRef(),
           [hasJoined, setHasJoined] = useState(false),
           [connectionMade, setConnectionMade] = useState(false),
           [otherUsers, setOtherusers] = useState([]),
@@ -34,9 +42,11 @@ const Room = (props) => {
           queryNoticeRef = useRef(),
           [screenShared, setScreenShared] = useState(false);
           screenSharedRef.current = screenShared;
+        //   fileRef.current = file;
 
 
     socketRef.current = useContext(socketContext);
+
 
     const pauseTrack = useCallback((track)=>{
         switch(track){
@@ -74,6 +84,7 @@ const Room = (props) => {
     },[])
 
     useEffect(()=>{
+
         const x = window.matchMedia("(max-width: 900px)");
 
         //query function 
@@ -354,7 +365,6 @@ const Room = (props) => {
                             </div>
                     </div>  
                 </div>
-              
         </div>
 
      );

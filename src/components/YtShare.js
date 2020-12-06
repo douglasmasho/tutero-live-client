@@ -126,7 +126,7 @@ const YtShare = (props) => {
 
     const handleIncomingData = (data)=>{
         console.log(data, "loooloo");
-
+        
             const obj = JSON.parse(data);
 
             switch(obj.type){
@@ -171,7 +171,6 @@ const YtShare = (props) => {
                     break;
                 default: ///do nothing
             }
-        
 
     }
 
